@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+  <head>
+    <title>GitHub Issue Tracker</title>
+    <script src="options.js"></script>
+  </head>
+  <body>
+    <div>
+      <h2>API access</h2>
+      <label for="oauth-token">Token</label>
+      <input id="oauth-token" type="text">
+      <p>
+        <a id="gh_link" href="https://github.com/settings/tokens/new?scopes=user&description=GitHub Issue Tracker" target="_blank">
+          Create a token
+        </a> with the <strong>user</strong> permission and specify it.
+      </p>
+      <div id="status"></div>
+      <div>
+        <button id="save-button" type="button">Save</button>
+      </div>
+    </div>
+  </body>
+</html>

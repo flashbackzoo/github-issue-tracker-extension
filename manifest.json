@@ -1,0 +1,16 @@
+{
+  "manifest_version": 2,
+  "name": "GitHub issue tracker",
+  "description": "Makes it easier to keep track of issues across lots of repos.",
+  "version": "1.0",
+  "background": {
+    "page": "background.html"
+  },
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html",
+    "default_title": "GitHub issue tracker"
+  },
+  "options_page": "options.html",
+  "permissions": ["alarms", "storage"]
+}
