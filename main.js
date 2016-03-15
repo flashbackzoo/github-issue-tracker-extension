@@ -1,25 +1,10 @@
 (function () {
-    function success(json) {
-        chrome.storage.local.set({
-            avatarUrl: json.avatar_url,
-            handle: json.login,
-            trackedIssues: []
-        });
-    }
+    chrome.storage.local.get('oauthToken', function (storage) {
+        if (typeof storage.oauthToken === 'undefined') {
+            return chrome.runtime.openOptionsPage();
+        }
 
-    function fetch() {
-        chrome.storage.local.get('oauthToken', function (storage) {
-            window.issueTracker.fetch(storage.oauthToken, success);
-        });
-    }
-
-    // Fetch updates on a timeout.
-    chrome.alarms.create('fetch', {
-        delayInMinutes: 10,
-        periodInMinutes: 10
+        window.issueTracker.setToken(storage.oauthToken);
+        window.issueTracker.startPolling();
     });
-
-    chrome.alarms.onAlarm.addListener(fetch);
-
-    fetch();
 }());

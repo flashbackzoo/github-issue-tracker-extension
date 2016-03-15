@@ -5,7 +5,7 @@
             saveButton = document.getElementById('save-button');
 
         chrome.storage.local.get('oauthToken', function (storage) {
-            oauthToken.value = storage.oauthToken;
+            oauthToken.value = storage.oauthToken || '';
         });
 
         saveButton.addEventListener('click', function () {
@@ -19,6 +19,9 @@
                 status.textContent = 'You need to specify a value.';
                 return;
             }
+
+            window.issueTracker.setToken(value);
+            window.issueTracker.restartPolling();
 
             chrome.storage.local.set({ oauthToken: value }, function() {
                 status.textContent = 'Settings saved';
