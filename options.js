@@ -1,4 +1,5 @@
 (function () {
+
     document.addEventListener('DOMContentLoaded', function () {
         var oauthToken = document.getElementById('oauth-token'),
             status = document.getElementById('status'),
@@ -20,12 +21,12 @@
                 return;
             }
 
-            window.issueTracker.setToken(value);
-            window.issueTracker.restartPolling();
+            window.gitHubIssueTracker = new window.GitHubIssueTracker(value);
 
             chrome.storage.local.set({ oauthToken: value }, function() {
                 status.textContent = 'Settings saved';
             });
         });
     });
+
 }());

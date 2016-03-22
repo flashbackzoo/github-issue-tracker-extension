@@ -43,7 +43,7 @@
             profile.appendChild(profileImage);
         });
 
-        chrome.storage.local.get('handle', function (storage) {
+        chrome.storage.local.get('username', function (storage) {
             var profileHandle;
 
             if (typeof storage.handle === 'undefined') {
@@ -56,7 +56,7 @@
             profile.appendChild(profileHandle);
         });
 
-        chrome.storage.local.get('issues', function (storage) {
+        chrome.storage.local.get('trackedIssues', function (storage) {
             var trackedIssues,
                 noIssuesMessage,
                 issuesList,
@@ -71,7 +71,7 @@
             } else {
                 issuesList = document.createElement('ul');
 
-                for (index = 0; index < storage.issues.length; index += 1) {
+                for (index = 0; index < storage.trackedIssues.length; index += 1) {
                     issuesListItem = document.createElement('li');
                     issuesListItem.textContent = index;
 
