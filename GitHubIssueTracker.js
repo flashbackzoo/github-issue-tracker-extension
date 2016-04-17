@@ -135,5 +135,20 @@
         });
     };
 
+    /**
+     * Removes an issue or pull request from the store.
+     *
+     * @param {String} id
+     */
+    GitHubIssueTracker.prototype.removeTrackedItem = function (id) {
+        chrome.storage.sync.get('trackedItems', (storage) => {
+            var trackedItems = storage.trackedItems || {};
+
+            delete trackedItems[id];
+
+            chrome.storage.sync.set({ trackedItems: trackedItems });
+        });
+    };
+
     window.GitHubIssueTracker = GitHubIssueTracker;
 }());

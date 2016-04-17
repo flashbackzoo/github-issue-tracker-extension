@@ -72,6 +72,7 @@
                 noIssuesMessage,
                 issuesList,
                 issuesListItem,
+                removeButton,
                 index;
 
             if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
@@ -84,8 +85,18 @@
 
                 Object.keys(trackedItems).forEach((key) => {
                     issuesListItem = document.createElement('li');
+                    removeButton = document.createElement('button');
+
                     issuesListItem.textContent = trackedItems[key].title;
 
+                    removeButton.type = 'button';
+                    removeButton.textContent = 'Remove';
+                    removeButton.dataset.url = key;
+                    removeButton.addEventListener('click', (event) => {
+                        tracker.removeTrackedItem(event.target.dataset.url);
+                    });
+
+                    issuesListItem.appendChild(removeButton)
                     issuesList.appendChild(issuesListItem);
                 });
 
