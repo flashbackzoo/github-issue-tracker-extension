@@ -1,11 +1,10 @@
 (function () {
-
     document.addEventListener('DOMContentLoaded', function () {
         var oauthToken = document.getElementById('oauth-token'),
             status = document.getElementById('status'),
             saveButton = document.getElementById('save-button');
 
-        chrome.storage.local.get('oauthToken', function (storage) {
+        chrome.storage.sync.get('oauthToken', function (storage) {
             oauthToken.value = storage.oauthToken || '';
         });
 
@@ -21,12 +20,9 @@
                 return;
             }
 
-            window.gitHubIssueTracker = new window.GitHubIssueTracker(value);
-
-            chrome.storage.local.set({ oauthToken: value }, function() {
+            chrome.storage.sync.set({ oauthToken: value }, function() {
                 status.textContent = 'Settings saved';
             });
         });
     });
-
 }());

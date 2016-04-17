@@ -1,11 +1,11 @@
 (function () {
+    var tracker = window.tracker = new window.GitHubIssueTracker();
 
-    chrome.storage.local.get('oauthToken', function (storage) {
+    chrome.storage.sync.get('oauthToken', function (storage) {
         if (typeof storage.oauthToken === 'undefined') {
             return chrome.runtime.openOptionsPage();
         }
 
-        window.gitHubIssueTracker = new window.GitHubIssueTracker(storage.oauthToken);
+        tracker.authenticate(storage.oauthToken);
     });
-
 }());

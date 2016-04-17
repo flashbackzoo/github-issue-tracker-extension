@@ -1,5 +1,4 @@
 (function () {
-
     function showSetupContent() {
         var profile = document.getElementById('profile'),
             message = document.createElement('p'),
@@ -19,17 +18,29 @@
     }
 
     function showAppContent() {
-        var profile = document.getElementById('profile'),
-            actions = document.getElementById('actions');
+        var tracker = chrome.extension.getBackgroundPage().tracker,
+            profile = document.getElementById('profile'),
+            actions = document.getElementById('actions'),
             issues = document.getElementById('issues'),
             addButton = document.createElement('button');
 
         addButton.type = 'button';
         addButton.textContent = 'Add';
 
-        actions.appendChild(addButton);
+        addButton.addEventListener('click', function (event) {
+            tracker.canTrackCurrentUrl(function (item) {
+                tracker.addTrackedItem(item.vendor, item.project, item.type, item.ticket);
+            });
+        });
 
-        chrome.storage.local.get('avatarUrl', function (storage) {
+        tracker.canTrackCurrentUrl(function () {
+            actions.appendChild(addButton);
+        }, function () {
+            addButton.disabled = true;
+            actions.appendChild(addButton);
+        });
+
+        chrome.storage.sync.get('avatarUrl', function (storage) {
             var profileImage;
 
             if (typeof storage.avatarUrl === 'undefined') {
@@ -43,7 +54,7 @@
             profile.appendChild(profileImage);
         });
 
-        chrome.storage.local.get('username', function (storage) {
+        chrome.storage.sync.get('username', function (storage) {
             var profileHandle;
 
             if (typeof storage.handle === 'undefined') {
@@ -56,14 +67,14 @@
             profile.appendChild(profileHandle);
         });
 
-        chrome.storage.local.get('trackedIssues', function (storage) {
-            var trackedIssues,
+        chrome.storage.sync.get('trackedItems', function (storage) {
+            var trackedItems = storage.trackedItems,
                 noIssuesMessage,
                 issuesList,
                 issuesListItem,
                 index;
 
-            if (typeof storage.trackedIssues === 'undefined' || storage.trackedIssues.length === 0) {
+            if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
                 noIssuesMessage = document.createElement('p');
                 noIssuesMessage.textContent = "You're not tracking any issues.";
 
@@ -71,12 +82,12 @@
             } else {
                 issuesList = document.createElement('ul');
 
-                for (index = 0; index < storage.trackedIssues.length; index += 1) {
+                Object.keys(trackedItems).forEach((key) => {
                     issuesListItem = document.createElement('li');
-                    issuesListItem.textContent = index;
+                    issuesListItem.textContent = trackedItems[key].title;
 
                     issuesList.appendChild(issuesListItem);
-                }
+                });
 
                 issues.appendChild(issuesList);
             }
@@ -84,7 +95,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        chrome.storage.local.get('oauthToken', function (storage) {
+        chrome.storage.sync.get('oauthToken', function (storage) {
             if (typeof storage.oauthToken === 'undefined') {
                 return showSetupContent();
             }
