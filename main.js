@@ -1,11 +1,12 @@
-(function () {
-    var tracker = window.tracker = new window.GitHubIssueTracker();
+(() => {
+  const tracker = window.tracker = new window.GitHubIssueTracker();
 
-    chrome.storage.sync.get('oauthToken', function (storage) {
-        if (typeof storage.oauthToken === 'undefined') {
-            return chrome.runtime.openOptionsPage();
-        }
+  chrome.storage.sync.get('oauthToken', (storage) => {
+    if (typeof storage.oauthToken === 'undefined') {
+      chrome.runtime.openOptionsPage();
+      return;
+    }
 
-        tracker.authenticate(storage.oauthToken);
-    });
-}());
+    tracker.authenticate(storage.oauthToken);
+  });
+})();

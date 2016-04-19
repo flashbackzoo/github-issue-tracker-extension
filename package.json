@@ -1,0 +1,25 @@
+{
+  "name": "github-issue-tracker-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension that doesn't really work yet...",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flashbackzoo/github-issue-tracker-extension.git"
+  },
+  "author": "David Craig <david@davidcraig.co.nz>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flashbackzoo/github-issue-tracker-extension/issues"
+  },
+  "homepage": "https://github.com/flashbackzoo/github-issue-tracker-extension#readme",
+  "devDependencies": {
+    "eslint": "^2.8.0",
+    "eslint-config-airbnb": "^7.0.0",
+    "eslint-plugin-jsx-a11y": "^0.6.2",
+    "eslint-plugin-react": "^4.3.0"
+  }
+}
