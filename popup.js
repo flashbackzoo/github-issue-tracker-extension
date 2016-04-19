@@ -18,7 +18,7 @@
   }
 
   function showAppContent() {
-    const tracker = chrome.extension.getBackgroundPage().tracker;
+    const tracker = chrome.extension.getBackgroundPage().APP.tracker;
     const profile = document.getElementById('profile');
     const actions = document.getElementById('actions');
     const issues = document.getElementById('issues');
@@ -107,6 +107,10 @@
       }
 
       showAppContent();
+    });
+
+    chrome.runtime.onMessage.addListener((message) => {
+      console.log(message);
     });
   });
 })();
