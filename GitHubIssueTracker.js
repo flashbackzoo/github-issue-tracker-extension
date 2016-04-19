@@ -84,27 +84,29 @@
     /**
      * Matches the current tab's URL against a valid GitHub issue/pull URL pattern.
      *
-     * @param {Function} valid - Called if the passed URL is matches.
-     * @param {Function} invalid - Called if the passed URL doesn't match.
+     * @return {Promise}
      */
-    canTrackCurrentUrl(valid, invalid) {
-      chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
-        const url = tabs[0].url;
-        const parts = url
-          .match(/^https:\/\/github\.com\/([\w-]+\/)([\w-]+\/)(issues|pull)\/(\d+)(?:#[\w-]+)?$/);
+    canTrackCurrentUrl() {
+      const promise = new Promise((resolve) => {
+        chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+          const url = tabs[0].url;
+          const parts = url
+            .match(/^https:\/\/github\.com\/([\w-]+\/)([\w-]+\/)(issues|pull)\/(\d+)(?:#[\w-]+)?$/);
+          const result = parts !== null
+            ? {
+              project: parts[2].slice(0, -1),
+              ticket: parseInt(parts[4], 10),
+              type: parts[3],
+              vendor: parts[1].slice(0, -1),
+              url: parts[0],
+            }
+            : null;
 
-        if (parts !== null) {
-          valid({
-            project: parts[2].slice(0, -1),
-            ticket: parseInt(parts[4], 10),
-            type: parts[3],
-            vendor: parts[1].slice(0, -1),
-            url: parts[0],
-          });
-        } else if (typeof invalid === 'function') {
-          invalid(url);
-        }
+          resolve(result);
+        });
       });
+
+      return promise;
     }
 
     /**
