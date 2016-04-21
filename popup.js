@@ -8,7 +8,7 @@
      * Renders the setup view.
      */
     renderSetupView() {
-      const profile = document.getElementById('profile');
+      const profile = document.getElementById('profile-wrapper');
       const message = document.createElement('p');
       const link = document.createElement('a');
 
@@ -117,12 +117,14 @@
 
           if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
             const noIssuesMessage = document.createElement('p');
+            noIssuesMessage.id = 'tracked-items';
 
             noIssuesMessage.textContent = "You're not tracking any issues.";
 
             resolve(noIssuesMessage);
           } else {
             const issuesList = document.createElement('ul');
+            issuesList.id = 'tracked-items';
 
             Object.keys(trackedItems).forEach((key) => {
               const issuesListItem = document.createElement('li');
@@ -150,6 +152,27 @@
     }
 
     /**
+     * Destroys DOM elements created by the `Popup.renderContentView` method.
+     */
+    destroyContentView() {
+      const profileWrapper = document.getElementById('profile-wrapper');
+      const actionsWrapper = document.getElementById('actions-wrapper');
+      const trackedItemsWrapper = document.getElementById('tracked-items-wrapper');
+
+      while (profileWrapper.firstChild) {
+        profileWrapper.removeChild(profileWrapper.firstChild);
+      }
+
+      while (actionsWrapper.firstChild) {
+        actionsWrapper.removeChild(actionsWrapper.firstChild);
+      }
+
+      while (trackedItemsWrapper.firstChild) {
+        trackedItemsWrapper.removeChild(trackedItemsWrapper.firstChild);
+      }
+    }
+
+    /**
      * Renders the main content view.
      */
     renderContentView() {
@@ -171,9 +194,9 @@
           return this.createTrackedItemsListElement();
         })
         .then((trackedItemsListElement) => {
-          const actionsWrapper = document.getElementById('actions');
-          const profileWrapper = document.getElementById('profile');
-          const trackedItemsWrapper = document.getElementById('tracked-items');
+          const actionsWrapper = document.getElementById('actions-wrapper');
+          const profileWrapper = document.getElementById('profile-wrapper');
+          const trackedItemsWrapper = document.getElementById('tracked-items-wrapper');
 
           actionsWrapper.appendChild(addButtonElement);
 
@@ -202,8 +225,14 @@
       popup.renderContentView();
     });
 
+    // Update the tracked items list when an item is added or removed.
     chrome.runtime.onMessage.addListener((message) => {
-      console.log(message);
+      if (message.type !== 'TRACKED_ITEM_ADD' && message.type !== 'TRACKED_ITEM_REMOVE') {
+        return;
+      }
+
+      popup.destroyContentView();
+      popup.renderContentView();
     });
   });
 })();
