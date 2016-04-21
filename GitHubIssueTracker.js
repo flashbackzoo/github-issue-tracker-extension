@@ -120,12 +120,12 @@
       this.fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`, (json) => {
         chrome.storage.sync.get('trackedItems', (storage) => {
           const trackedItems = storage.trackedItems || {};
-          const message = {
-            type: 'TRACKED_ITEM_ADD',
-            payload: json.title,
-          };
+          const message = { type: 'TRACKED_ITEM_ADD' };
 
-          trackedItems[json.url] = { title: json.title };
+          trackedItems[json.id] = {
+            title: json.title,
+            url: json.html_url,
+          };
 
           chrome.storage.sync.set({ trackedItems }, () => {
             chrome.runtime.sendMessage(message);

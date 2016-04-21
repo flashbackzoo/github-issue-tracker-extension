@@ -34,6 +34,7 @@
       const promise = new Promise((resolve) => {
         const addButtonElement = document.createElement('button');
 
+        addButtonElement.className = 'add-button';
         addButtonElement.type = 'button';
         addButtonElement.textContent = 'Add';
         addButtonElement.addEventListener('click', () => {
@@ -72,6 +73,7 @@
 
           const avatarElement = document.createElement('img');
 
+          avatarElement.className = 'avatar';
           avatarElement.src = storage.avatarUrl;
           avatarElement.width = 40;
 
@@ -90,13 +92,14 @@
     createUsernameElement() {
       const promise = new Promise((resolve) => {
         chrome.storage.sync.get('username', (storage) => {
-          if (typeof storage.handle === 'undefined') {
+          if (typeof storage.username === 'undefined') {
             resolve(null);
           }
 
           const usernameElement = document.createElement('p');
 
-          usernameElement.textContent = storage.handle;
+          usernameElement.className = 'username';
+          usernameElement.textContent = storage.username;
 
           resolve(usernameElement);
         });
@@ -123,27 +126,38 @@
 
             resolve(noIssuesMessage);
           } else {
-            const issuesList = document.createElement('ul');
-            issuesList.id = 'tracked-items';
+            const listElement = document.createElement('ul');
+            listElement.className = 'tracked-item-list';
+            listElement.id = 'tracked-items';
 
             Object.keys(trackedItems).forEach((key) => {
-              const issuesListItem = document.createElement('li');
+              const itemElement = document.createElement('li');
+              const linkElement = document.createElement('a');
               const removeButton = document.createElement('button');
 
-              issuesListItem.textContent = trackedItems[key].title;
+              itemElement.className = 'tracked-item-list__tracked-item';
+
+              linkElement.textContent = trackedItems[key].title;
+              linkElement.className = 'tracked-item-list__tracked-item__link';
+              linkElement.href = trackedItems[key].url;
+              linkElement.target = '_blank';
+              linkElement.title = 'View on GitHub';
 
               removeButton.type = 'button';
-              removeButton.textContent = 'Remove';
-              removeButton.dataset.url = key;
+              removeButton.className = 'tracked-item-list__tracked-item__button';
+              removeButton.innerHTML = '&#10005;';
+              removeButton.dataset.item = key;
+              removeButton.title = 'Remove from list';
               removeButton.addEventListener('click', (event) => {
-                this.tracker.removeTrackedItem(event.target.dataset.url);
+                this.tracker.removeTrackedItem(event.target.dataset.item);
               });
 
-              issuesListItem.appendChild(removeButton);
-              issuesList.appendChild(issuesListItem);
+              itemElement.appendChild(linkElement);
+              itemElement.appendChild(removeButton);
+              listElement.appendChild(itemElement);
             });
 
-            resolve(issuesList);
+            resolve(listElement);
           }
         });
       });
