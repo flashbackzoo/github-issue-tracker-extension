@@ -3,9 +3,19 @@
   padding: 1em;
 }
 
-#profile-wrapper,
-#actions-wrapper {
-  margin-bottom: 1em;
+.setup-container {
+  padding: 1em;
+  text-align: center;
+}
+
+.profile-container,
+.actions-container {
+  margin-bottom: 2em;
+}
+
+.profile-container {
+  padding-bottom: 1em;
+  border-bottom: 1px solid #ddd;
 }
 
 .avatar {
@@ -18,10 +28,25 @@
   vertical-align: middle;
   margin-bottom: 0;
   margin-left: .6em;
+  font-size: .9em;
+  font-weight: bold;
+}
+
+.add-button-wrapper {
+  text-align: center;
 }
 
 .add-button {
+  display: block;
+  margin: 0 auto .5em;
+  padding: .3em .6em;
+  font-size: .9em;
   background: #4CAF50;
+}
+
+.add-button-description {
+  font-size: .8em;
+  font-weight: bold;
 }
 
 .add-button:active:enabled,
@@ -48,12 +73,35 @@
   margin-bottom: 0;
 }
 
+.tracked-item-list__tracked-item__container {
+  display: inline-block;
+  vertical-align: middle;
+  width: 430px;
+}
+
+.tracked-item-list__tracked-item__repo {
+  display: block;
+  margin-bottom: .2em;
+  font-size: .8em;
+  font-weight: bold;
+}
+
 .tracked-item-list__tracked-item__link {
+  display: inline-block;;
+  margin-bottom: .2em;
   font-size: .9em;
 }
 
+.tracked-item-list__tracked-item__updated {
+  display: block;
+  font-size: .8em;
+  font-style: italic;
+  color: #999;
+}
+
 .tracked-item-list__tracked-item__button {
-  float: right;
+  display: inline-block;
+  vertical-align: middle;
   width: 1.9em;
   height: 1.9em;
   padding: .2em .6em;

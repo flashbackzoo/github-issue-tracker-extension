@@ -1,6 +1,11 @@
 (() => {
   class Popup {
     constructor(tracker) {
+      this.monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December',
+      ];
+
       this.tracker = tracker;
     }
 
@@ -8,21 +13,26 @@
      * Renders the setup view.
      */
     renderSetupView() {
-      const profile = document.getElementById('profile-wrapper');
-      const message = document.createElement('p');
-      const link = document.createElement('a');
+      const profileWrapperElement = document.getElementById('profile-wrapper');
+      const sectionContainerElement = document.createElement('div');
+      const messageElement = document.createElement('p');
+      const linkElement = document.createElement('a');
 
-      message.textContent = 'You need to create a GitHub OAuth token. ';
+      sectionContainerElement.className = 'setup-container';
 
-      link.href = '#';
-      link.textContent = 'Options';
-      link.addEventListener('click', () => {
+      messageElement.className = 'setup-message';
+      messageElement
+        .textContent = 'First you need to create a GitHub OAuth token in ';
+
+      linkElement.href = '#';
+      linkElement.textContent = 'options';
+      linkElement.addEventListener('click', () => {
         chrome.runtime.openOptionsPage();
       });
 
-      message.appendChild(link);
-
-      profile.appendChild(message);
+      messageElement.appendChild(linkElement);
+      sectionContainerElement.appendChild(messageElement);
+      profileWrapperElement.appendChild(sectionContainerElement);
     }
 
     /**
@@ -32,11 +42,15 @@
      */
     createAddButtonElement() {
       const promise = new Promise((resolve) => {
+        const addButtonWrapperElement = document.createElement('div');
         const addButtonElement = document.createElement('button');
+        const addDescriptionElement = document.createElement('span');
+
+        addButtonWrapperElement.className = 'add-button-wrapper';
 
         addButtonElement.className = 'add-button';
         addButtonElement.type = 'button';
-        addButtonElement.textContent = 'Add';
+        addButtonElement.textContent = 'Add to list';
         addButtonElement.addEventListener('click', () => {
           this.tracker.canTrackCurrentUrl()
             .then((item) => {
@@ -47,12 +61,22 @@
             });
         });
 
+        addDescriptionElement.className = 'add-button-description';
+
         return this.tracker.canTrackCurrentUrl()
           .then((item) => {
             if (item === null) {
+              addDescriptionElement
+                .textContent = 'Visit a GitHub issue or pull request URL to track it.';
               addButtonElement.disabled = true;
+            } else {
+              addDescriptionElement.textContent = item.url;
             }
-            resolve(addButtonElement);
+
+            addButtonWrapperElement.appendChild(addButtonElement);
+            addButtonWrapperElement.appendChild(addDescriptionElement);
+
+            resolve(addButtonWrapperElement);
           });
       });
 
@@ -75,7 +99,7 @@
 
           avatarElement.className = 'avatar';
           avatarElement.src = storage.avatarUrl;
-          avatarElement.width = 40;
+          avatarElement.width = 30;
 
           resolve(avatarElement);
         });
@@ -117,31 +141,43 @@
       const promise = new Promise((resolve) => {
         chrome.storage.sync.get('trackedItems', (storage) => {
           const trackedItems = storage.trackedItems;
+          const listElement = document.createElement('ul');
+
+          listElement.className = 'tracked-item-list';
+          listElement.id = 'tracked-items';
 
           if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
-            const noIssuesMessage = document.createElement('p');
-            noIssuesMessage.id = 'tracked-items';
-
-            noIssuesMessage.textContent = "You're not tracking any issues.";
-
-            resolve(noIssuesMessage);
+            resolve(listElement);
           } else {
-            const listElement = document.createElement('ul');
-            listElement.className = 'tracked-item-list';
-            listElement.id = 'tracked-items';
-
             Object.keys(trackedItems).forEach((key) => {
               const itemElement = document.createElement('li');
+              const itemContainer = document.createElement('div');
+              const repoElement = document.createElement('span');
               const linkElement = document.createElement('a');
+              const updatedDate = new Date(trackedItems[key].updated);
+              const updatedDay = updatedDate.getDate();
+              const updatedMonth = this.monthNames[updatedDate.getMonth()];
+              const updatedYear = updatedDate.getFullYear();
+              const updatedElement = document.createElement('span');
               const removeButton = document.createElement('button');
+
+              itemContainer.className = 'tracked-item-list__tracked-item__container';
 
               itemElement.className = 'tracked-item-list__tracked-item';
 
-              linkElement.textContent = trackedItems[key].title;
+              repoElement.className = 'tracked-item-list__tracked-item__repo';
+              repoElement
+                .textContent = `${trackedItems[key].vendor} / ${trackedItems[key].project}`;
+
               linkElement.className = 'tracked-item-list__tracked-item__link';
               linkElement.href = trackedItems[key].url;
               linkElement.target = '_blank';
+              linkElement.textContent = trackedItems[key].title;
               linkElement.title = 'View on GitHub';
+
+              updatedElement.className = 'tracked-item-list__tracked-item__updated';
+              updatedElement
+                .textContent = `Updated: ${updatedDay} ${updatedMonth} ${updatedYear}`;
 
               removeButton.type = 'button';
               removeButton.className = 'tracked-item-list__tracked-item__button';
@@ -152,8 +188,13 @@
                 this.tracker.removeTrackedItem(event.target.dataset.item);
               });
 
-              itemElement.appendChild(linkElement);
+              itemContainer.appendChild(repoElement);
+              itemContainer.appendChild(linkElement);
+              itemContainer.appendChild(updatedElement);
+
+              itemElement.appendChild(itemContainer);
               itemElement.appendChild(removeButton);
+
               listElement.appendChild(itemElement);
             });
 
@@ -211,18 +252,29 @@
           const actionsWrapper = document.getElementById('actions-wrapper');
           const profileWrapper = document.getElementById('profile-wrapper');
           const trackedItemsWrapper = document.getElementById('tracked-items-wrapper');
+          const actionsContainer = document.createElement('div');
+          const profileContainer = document.createElement('div');
+          const trackedItemsContainer = document.createElement('div');
 
-          actionsWrapper.appendChild(addButtonElement);
+          actionsContainer.className = 'actions-container';
+          profileContainer.className = 'profile-container';
+          trackedItemsContainer.className = 'tracked-items-container';
+
+          actionsContainer.appendChild(addButtonElement);
+          actionsWrapper.appendChild(actionsContainer);
 
           if (avatarElement !== null) {
-            profileWrapper.appendChild(avatarElement);
+            profileContainer.appendChild(avatarElement);
           }
 
           if (usernameElement !== null) {
-            profileWrapper.appendChild(usernameElement);
+            profileContainer.appendChild(usernameElement);
           }
 
-          trackedItemsWrapper.appendChild(trackedItemsListElement);
+          profileWrapper.appendChild(profileContainer);
+
+          trackedItemsContainer.appendChild(trackedItemsListElement);
+          trackedItemsWrapper.appendChild(trackedItemsContainer);
         });
     }
   }
@@ -230,12 +282,25 @@
   document.addEventListener('DOMContentLoaded', () => {
     const popup = new Popup(chrome.extension.getBackgroundPage().APP.tracker);
 
+    // Render a view based on whether or not an OAuth token is set.
     chrome.storage.sync.get('oauthToken', (storage) => {
+      // If no OAuth token is set render the setup view.
       if (typeof storage.oauthToken === 'undefined') {
         popup.renderSetupView();
         return;
       }
 
+      // If an OAuth token is set but authentication hasn't happened,
+      // authenticate then render the content view.
+      if (popup.tracker.authenticated === false) {
+        popup.tracker.authenticate(storage.oauthToken)
+          .then(() => {
+            popup.renderContentView();
+          });
+        return;
+      }
+
+      // The user has an OAuth token and has authenticated.
       popup.renderContentView();
     });
 

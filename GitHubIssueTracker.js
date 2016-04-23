@@ -1,83 +1,63 @@
 (() => {
   class GitHubIssueTracker {
     constructor() {
-      this.alarmName = 'fetch';
       this.authenticated = false;
-      this.polling = false;
-      this.token = null;
     }
 
     authenticate(token) {
       const xhr = new XMLHttpRequest();
 
-      if (this.authenticated === true) {
-        return;
-      }
-
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          this.authenticated = true;
-          this.token = token;
-
-          const json = JSON.parse(xhr.response);
-
-          // Data used by other parts of the app. For example the popup.
-          chrome.storage.sync.set({
-            avatarUrl: json.avatar_url,
-            username: json.login,
-          });
-
-          this.startPolling();
+      return new Promise((resolve, reject) => {
+        if (this.authenticated === true) {
+          resolve();
         }
-      };
 
-      xhr.open('GET', 'https://api.github.com/user');
-      xhr.setRequestHeader('Authorization', `token ${token}`);
-      xhr.send();
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            const json = JSON.parse(xhr.response);
+
+            this.authenticated = true;
+
+            // Data used by other parts of the app. For example the popup.
+            chrome.storage.sync.set({
+              avatarUrl: json.avatar_url,
+              username: json.login,
+            });
+            resolve();
+          } else if (xhr.readyState === 4 && xhr.status !== 200) {
+            reject();
+          }
+        };
+
+        xhr.open('GET', 'https://api.github.com/user');
+        xhr.setRequestHeader('Authorization', `token ${token}`);
+        xhr.send();
+      });
     }
 
-    fetch(url, success) {
+    fetch(url) {
       const xhr = new XMLHttpRequest();
 
-      if (this.authenticated === false) {
-        throw new Error('You need to authenticate before fetching data.');
-      }
-
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          success(JSON.parse(xhr.response));
+      return new Promise((resolve, reject) => {
+        if (this.authenticated === false) {
+          reject();
         }
-      };
 
-      xhr.open('GET', url);
-      xhr.setRequestHeader('Authorization', `token ${this.token}`);
-      xhr.send();
-    }
+        chrome.storage.sync.get('oauthToken', (storage) => {
+          if (typeof storage.oauthToken === 'undefined') {
+            reject();
+          }
 
-    startPolling() {
-        // if (this.polling === true) {
-        //     return;
-        // }
-        //
-        // chrome.alarms.create(this.alarmName, {
-        //     delayInMinutes: 10,
-        //     periodInMinutes: 10
-        // });
-        //
-        // chrome.alarms.onAlarm.addListener(this.fetch);
-        //
-        // this.fetch();
-        //
-        // this.polling = true;
-    }
+          xhr.onreadystatechange = () => {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+              resolve(JSON.parse(xhr.response));
+            }
+          };
 
-    stopPolling() {
-      if (this.polling === false) {
-        return;
-      }
-
-      chrome.alarms.clear(this.alarmName, () => {
-        this.polling = false;
+          xhr.open('GET', url);
+          xhr.setRequestHeader('Authorization', `token ${storage.oauthToken}`);
+          xhr.send();
+        });
       });
     }
 
@@ -87,7 +67,7 @@
      * @return {Promise}
      */
     canTrackCurrentUrl() {
-      const promise = new Promise((resolve) => {
+      return new Promise((resolve) => {
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
           const url = tabs[0].url;
           const parts = url
@@ -105,33 +85,40 @@
           resolve(result);
         });
       });
-
-      return promise;
     }
 
     /**
      * Saves an issue or pull request to the store.
      *
-     * @param {String} url
+     * @param {String} vendor
+     * @param {String} project
+     * @param {String} type
+     * @param {String} ticket
+     * @return {Promise}
      */
     addTrackedItem(vendor, project, type, ticket) {
       const itemType = type === 'pull' ? 'pulls' : type;
 
-      this.fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`, (json) => {
-        chrome.storage.sync.get('trackedItems', (storage) => {
-          const trackedItems = storage.trackedItems || {};
-          const message = { type: 'TRACKED_ITEM_ADD' };
+      return this.fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`)
+        .then((json) => {
+          chrome.storage.sync.get('trackedItems', (storage) => {
+            const trackedItems = storage.trackedItems || {};
+            const message = { type: 'TRACKED_ITEM_ADD' };
 
-          trackedItems[json.id] = {
-            title: json.title,
-            url: json.html_url,
-          };
+            trackedItems[json.id] = {
+              project,
+              title: json.title,
+              type,
+              updated: json.updated_at,
+              url: json.html_url,
+              vendor,
+            };
 
-          chrome.storage.sync.set({ trackedItems }, () => {
-            chrome.runtime.sendMessage(message);
+            chrome.storage.sync.set({ trackedItems }, () => {
+              chrome.runtime.sendMessage(message);
+            });
           });
         });
-      });
     }
 
     /**
@@ -142,10 +129,7 @@
     removeTrackedItem(id) {
       chrome.storage.sync.get('trackedItems', (storage) => {
         const trackedItems = storage.trackedItems || {};
-        const message = {
-          type: 'TRACKED_ITEM_REMOVE',
-          payload: '',
-        };
+        const message = { type: 'TRACKED_ITEM_REMOVE' };
 
         delete trackedItems[id];
 
