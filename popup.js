@@ -57,7 +57,13 @@
               if (item === null) {
                 return;
               }
-              this.tracker.addTrackedItem(item.vendor, item.project, item.type, item.ticket);
+              this
+                .tracker
+                .addTrackedItem(item.vendor, item.project, item.type, item.ticket)
+                .then(() => {
+                  this.destroyContentView();
+                  this.renderContentView();
+                });
             });
         });
 
@@ -172,7 +178,13 @@
                 removeButton.dataset.item = item.id;
                 removeButton.title = 'Remove from list';
                 removeButton.addEventListener('click', (event) => {
-                  this.tracker.removeTrackedItem(event.target.dataset.item);
+                  this
+                    .tracker
+                    .removeTrackedItem(event.target.dataset.item)
+                    .then(() => {
+                      this.destroyContentView();
+                      this.renderContentView();
+                    });
                 });
 
                 itemContainer.appendChild(repoElement);
@@ -252,25 +264,15 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const popup = new Popup(chrome.extension.getBackgroundPage().APP.tracker);
-
     // Render a view based on whether or not an OAuth token is set.
     chrome.storage.sync.get('oauthToken', (storage) => {
+      const popup = new Popup(chrome.extension.getBackgroundPage().APP.tracker);
+
       if (typeof storage.oauthToken === 'undefined') {
         popup.renderSetupView();
       } else {
         popup.renderContentView();
       }
-    });
-
-    // Update the tracked items list when an item is added or removed.
-    chrome.runtime.onMessage.addListener((message) => {
-      if (message.type !== 'TRACKED_ITEM_ADD' && message.type !== 'TRACKED_ITEM_REMOVE') {
-        return;
-      }
-
-      popup.destroyContentView();
-      popup.renderContentView();
     });
   });
 })();

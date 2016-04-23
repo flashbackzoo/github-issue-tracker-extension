@@ -17,8 +17,9 @@
                   avatarUrl: json.avatar_url,
                   login: json.login,
                 };
-                chrome.storage.sync.set({ user });
-                resolve(user);
+                chrome.storage.sync.set({ user }, () => {
+                  resolve(user);
+                });
               })
               .catch(() => {
                 reject();
@@ -128,45 +129,49 @@
      * @return {Promise}
      */
     addTrackedItem(vendor, project, type, ticket) {
-      const itemType = type === 'pull' ? 'pulls' : type;
+      return new Promise((resolve) => {
+        const itemType = type === 'pull' ? 'pulls' : type;
 
-      return this
-        .fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`)
-        .then((json) => {
-          chrome.storage.sync.get('trackedItems', (storage) => {
-            const trackedItems = storage.trackedItems || {};
-            const message = { type: 'TRACKED_ITEM_ADD' };
+        this
+          .fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`)
+          .then((json) => {
+            chrome.storage.sync.get('trackedItems', (storage) => {
+              const trackedItems = storage.trackedItems || {};
+              const item = {
+                project,
+                title: json.title,
+                type,
+                updated: json.updated_at,
+                url: json.html_url,
+                vendor,
+              };
 
-            trackedItems[json.id] = {
-              project,
-              title: json.title,
-              type,
-              updated: json.updated_at,
-              url: json.html_url,
-              vendor,
-            };
+              trackedItems[json.id] = item;
 
-            chrome.storage.sync.set({ trackedItems }, () => {
-              chrome.runtime.sendMessage(message);
+              chrome.storage.sync.set({ trackedItems }, () => {
+                resolve(item);
+              });
             });
           });
-        });
+      });
     }
 
     /**
      * Removes an issue or pull request from the store.
      *
      * @param {String} id
+     * @return {Promise}
      */
     removeTrackedItem(id) {
-      chrome.storage.sync.get('trackedItems', (storage) => {
-        const trackedItems = storage.trackedItems || {};
-        const message = { type: 'TRACKED_ITEM_REMOVE' };
+      return new Promise((resolve) => {
+        chrome.storage.sync.get('trackedItems', (storage) => {
+          const trackedItems = storage.trackedItems || {};
 
-        delete trackedItems[id];
+          delete trackedItems[id];
 
-        chrome.storage.sync.set({ trackedItems }, () => {
-          chrome.runtime.sendMessage(message);
+          chrome.storage.sync.set({ trackedItems }, () => {
+            resolve();
+          });
         });
       });
     }
