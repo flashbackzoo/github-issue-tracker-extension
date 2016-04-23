@@ -86,6 +86,39 @@
     }
 
     /**
+     * Gets all items currently being tracked.
+     *
+     * @return {Promise}
+     */
+    getTrackedItems() {
+      return new Promise((resolve) => {
+        chrome.storage.sync.get('trackedItems', (storage) => {
+          const items = storage.trackedItems;
+
+          if (typeof items === 'undefined' || Object.keys(items).length === 0) {
+            resolve([]);
+          }
+
+          const itemList = Object
+            .keys(items)
+            .reduce((result, key) => {
+              result.push({
+                id: key,
+                project: items[key].project,
+                title: items[key].title,
+                updated: items[key].updated,
+                vendor: items[key].vendor,
+                url: items[key].url,
+              });
+              return result;
+            }, []);
+
+          resolve(itemList);
+        });
+      });
+    }
+
+    /**
      * Saves an issue or pull request to the store.
      *
      * @param {String} vendor

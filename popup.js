@@ -120,31 +120,21 @@
      */
     createTrackedItemsListElement() {
       return new Promise((resolve) => {
-        chrome.storage.sync.get('trackedItems', (storage) => {
-          const trackedItems = storage.trackedItems;
-          const listElement = document.createElement('ul');
+        this
+          .tracker
+          .getTrackedItems()
+          .then((itemList) => {
+            const listElement = document.createElement('ul');
 
-          listElement.className = 'tracked-item-list';
-          listElement.id = 'tracked-items';
+            listElement.className = 'tracked-item-list';
+            listElement.id = 'tracked-items';
 
-          if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
-            resolve(listElement);
-          } else {
-            Object
-              .keys(trackedItems)
-              // Transform the tracked items store to an array.
-              .reduce((result, key) => {
-                result.push({
-                  id: key,
-                  project: trackedItems[key].project,
-                  title: trackedItems[key].title,
-                  updated: trackedItems[key].updated,
-                  vendor: trackedItems[key].vendor,
-                  url: trackedItems[key].url,
-                });
-                return result;
-              }, [])
-              // Sort the array by most recent activity.
+            if (itemList.length === 0) {
+              resolve(listElement);
+              return;
+            }
+
+            itemList
               .sort((a, b) => new Date(b.updated) - new Date(a.updated))
               .forEach((item) => {
                 const itemElement = document.createElement('li');
@@ -196,8 +186,7 @@
               });
 
             resolve(listElement);
-          }
-        });
+          });
       });
     }
 
