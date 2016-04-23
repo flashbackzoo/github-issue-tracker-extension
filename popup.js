@@ -41,7 +41,7 @@
      * @return {Promise}
      */
     createAddButtonElement() {
-      const promise = new Promise((resolve) => {
+      return new Promise((resolve) => {
         const addButtonWrapperElement = document.createElement('div');
         const addButtonElement = document.createElement('button');
         const addDescriptionElement = document.createElement('span');
@@ -79,8 +79,6 @@
             resolve(addButtonWrapperElement);
           });
       });
-
-      return promise;
     }
 
     /**
@@ -89,7 +87,7 @@
      * @return {Promise}
      */
     createAvatarElement() {
-      const promise = new Promise((resolve) => {
+      return new Promise((resolve) => {
         chrome.storage.sync.get('avatarUrl', (storage) => {
           if (typeof storage.avatarUrl === 'undefined') {
             resolve(null);
@@ -104,8 +102,6 @@
           resolve(avatarElement);
         });
       });
-
-      return promise;
     }
 
     /**
@@ -114,7 +110,7 @@
      * @return {Promise}
      */
     createUsernameElement() {
-      const promise = new Promise((resolve) => {
+      return new Promise((resolve) => {
         chrome.storage.sync.get('username', (storage) => {
           if (typeof storage.username === 'undefined') {
             resolve(null);
@@ -128,8 +124,6 @@
           resolve(usernameElement);
         });
       });
-
-      return promise;
     }
 
     /**
@@ -138,7 +132,7 @@
      * @return {Promise}
      */
     createTrackedItemsListElement() {
-      const promise = new Promise((resolve) => {
+      return new Promise((resolve) => {
         chrome.storage.sync.get('trackedItems', (storage) => {
           const trackedItems = storage.trackedItems;
           const listElement = document.createElement('ul');
@@ -149,61 +143,75 @@
           if (typeof trackedItems === 'undefined' || Object.keys(trackedItems).length === 0) {
             resolve(listElement);
           } else {
-            Object.keys(trackedItems).forEach((key) => {
-              const itemElement = document.createElement('li');
-              const itemContainer = document.createElement('div');
-              const repoElement = document.createElement('span');
-              const linkElement = document.createElement('a');
-              const updatedDate = new Date(trackedItems[key].updated);
-              const updatedDay = updatedDate.getDate();
-              const updatedMonth = this.monthNames[updatedDate.getMonth()];
-              const updatedYear = updatedDate.getFullYear();
-              const updatedElement = document.createElement('span');
-              const removeButton = document.createElement('button');
+            Object
+              .keys(trackedItems)
+              // Transform the tracked items store to an array.
+              .reduce((result, key) => {
+                result.push({
+                  id: key,
+                  project: trackedItems[key].project,
+                  title: trackedItems[key].title,
+                  updated: trackedItems[key].updated,
+                  vendor: trackedItems[key].vendor,
+                  url: trackedItems[key].url,
+                });
+                return result;
+              }, [])
+              // Sort the array by most recent activity.
+              .sort((a, b) => new Date(b.updated) - new Date(a.updated))
+              .forEach((item) => {
+                const itemElement = document.createElement('li');
+                const itemContainer = document.createElement('div');
+                const repoElement = document.createElement('span');
+                const linkElement = document.createElement('a');
+                const updatedDate = new Date(item.updated);
+                const updatedDay = updatedDate.getDate();
+                const updatedMonth = this.monthNames[updatedDate.getMonth()];
+                const updatedYear = updatedDate.getFullYear();
+                const updatedElement = document.createElement('span');
+                const removeButton = document.createElement('button');
 
-              itemContainer.className = 'tracked-item-list__tracked-item__container';
+                itemContainer.className = 'tracked-item-list__tracked-item__container';
 
-              itemElement.className = 'tracked-item-list__tracked-item';
+                itemElement.className = 'tracked-item-list__tracked-item';
 
-              repoElement.className = 'tracked-item-list__tracked-item__repo';
-              repoElement
-                .textContent = `${trackedItems[key].vendor} / ${trackedItems[key].project}`;
+                repoElement.className = 'tracked-item-list__tracked-item__repo';
+                repoElement
+                  .textContent = `${item.vendor} / ${item.project}`;
 
-              linkElement.className = 'tracked-item-list__tracked-item__link';
-              linkElement.href = trackedItems[key].url;
-              linkElement.target = '_blank';
-              linkElement.textContent = trackedItems[key].title;
-              linkElement.title = 'View on GitHub';
+                linkElement.className = 'tracked-item-list__tracked-item__link';
+                linkElement.href = item.url;
+                linkElement.target = '_blank';
+                linkElement.textContent = item.title;
+                linkElement.title = 'View on GitHub';
 
-              updatedElement.className = 'tracked-item-list__tracked-item__updated';
-              updatedElement
-                .textContent = `Updated: ${updatedDay} ${updatedMonth} ${updatedYear}`;
+                updatedElement.className = 'tracked-item-list__tracked-item__updated';
+                updatedElement
+                  .textContent = `Updated: ${updatedDay} ${updatedMonth} ${updatedYear}`;
 
-              removeButton.type = 'button';
-              removeButton.className = 'tracked-item-list__tracked-item__button';
-              removeButton.innerHTML = '&#10005;';
-              removeButton.dataset.item = key;
-              removeButton.title = 'Remove from list';
-              removeButton.addEventListener('click', (event) => {
-                this.tracker.removeTrackedItem(event.target.dataset.item);
+                removeButton.type = 'button';
+                removeButton.className = 'tracked-item-list__tracked-item__button';
+                removeButton.innerHTML = '&#10005;';
+                removeButton.dataset.item = item.id;
+                removeButton.title = 'Remove from list';
+                removeButton.addEventListener('click', (event) => {
+                  this.tracker.removeTrackedItem(event.target.dataset.item);
+                });
+
+                itemContainer.appendChild(repoElement);
+                itemContainer.appendChild(linkElement);
+                itemContainer.appendChild(updatedElement);
+
+                itemElement.appendChild(itemContainer);
+                itemElement.appendChild(removeButton);
+
+                listElement.appendChild(itemElement);
               });
-
-              itemContainer.appendChild(repoElement);
-              itemContainer.appendChild(linkElement);
-              itemContainer.appendChild(updatedElement);
-
-              itemElement.appendChild(itemContainer);
-              itemElement.appendChild(removeButton);
-
-              listElement.appendChild(itemElement);
-            });
 
             resolve(listElement);
           }
         });
       });
-
-      return promise;
     }
 
     /**
