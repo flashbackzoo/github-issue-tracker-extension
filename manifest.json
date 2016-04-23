@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "GitHub issue tracker",
-  "description": "Makes it easier to keep track of issues across lots of repos.",
+  "name": "GitHub Wrangler",
+  "description": "Manage issues and pull requests across multiple repos.",
   "version": "1.0",
   "background": {
     "scripts": ["GitHubIssueTracker.js", "main.js"]
@@ -9,7 +9,7 @@
   "browser_action": {
     "default_icon": "icon.png",
     "default_popup": "popup.html",
-    "default_title": "GitHub issue tracker"
+    "default_title": "GitHub Wrangler"
   },
   "options_page": "options.html",
   "permissions": ["alarms", "storage", "tabs"]

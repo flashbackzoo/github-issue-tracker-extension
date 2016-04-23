@@ -1,21 +1,20 @@
 {
-  "name": "github-issue-tracker-extension",
+  "name": "github-wrangler-extension",
   "version": "1.0.0",
-  "description": "Chrome extension that doesn't really work yet...",
+  "description": "Chrome extension for managing issues and pull requests across multiple repos.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/flashbackzoo/github-issue-tracker-extension.git"
+    "url": "git+https://github.com/flashbackzoo/github-wrangler-extension.git"
   },
   "author": "David Craig <david@davidcraig.co.nz>",
-  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/flashbackzoo/github-issue-tracker-extension/issues"
+    "url": "https://github.com/flashbackzoo/github-wrangler-extension/issues"
   },
-  "homepage": "https://github.com/flashbackzoo/github-issue-tracker-extension#readme",
+  "homepage": "https://github.com/flashbackzoo/github-wrangler-extension#readme",
   "devDependencies": {
     "eslint": "^2.8.0",
     "eslint-config-airbnb": "^7.0.0",
