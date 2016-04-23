@@ -1,56 +1,54 @@
 (() => {
   class GitHubIssueTracker {
-    constructor() {
-      this.authenticated = false;
-    }
-
-    authenticate(token) {
-      const xhr = new XMLHttpRequest();
-
+    /**
+     * Gets the user's details either from storage or the GitHub API.
+     *
+     * @param {String} token
+     * @return {Promise}
+     */
+    getUser() {
       return new Promise((resolve, reject) => {
-        if (this.authenticated === true) {
-          resolve();
-        }
-
-        xhr.onreadystatechange = () => {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            const json = JSON.parse(xhr.response);
-
-            this.authenticated = true;
-
-            // Data used by other parts of the app. For example the popup.
-            chrome.storage.sync.set({
-              avatarUrl: json.avatar_url,
-              username: json.login,
-            });
-            resolve();
-          } else if (xhr.readyState === 4 && xhr.status !== 200) {
-            reject();
+        chrome.storage.sync.get('user', (storage) => {
+          if (typeof storage.user === 'undefined') {
+            this
+              .fetch('https://api.github.com/user')
+              .then((json) => {
+                const user = {
+                  avatarUrl: json.avatar_url,
+                  login: json.login,
+                };
+                chrome.storage.sync.set({ user });
+                resolve(user);
+              })
+              .catch(() => {
+                reject();
+              });
+          } else {
+            resolve(storage.user);
           }
-        };
-
-        xhr.open('GET', 'https://api.github.com/user');
-        xhr.setRequestHeader('Authorization', `token ${token}`);
-        xhr.send();
+        });
       });
     }
 
+    /**
+     * Makes an authenticated request to a GitHub API endpoint.
+     *
+     * @param {String} url
+     */
     fetch(url) {
-      const xhr = new XMLHttpRequest();
-
       return new Promise((resolve, reject) => {
-        if (this.authenticated === false) {
-          reject();
-        }
-
         chrome.storage.sync.get('oauthToken', (storage) => {
           if (typeof storage.oauthToken === 'undefined') {
             reject();
           }
 
+          const xhr = new XMLHttpRequest();
+
           xhr.onreadystatechange = () => {
             if (xhr.readyState === 4 && xhr.status === 200) {
               resolve(JSON.parse(xhr.response));
+            } else if (xhr.readyState === 4 && xhr.status !== 200) {
+              reject();
             }
           };
 
@@ -99,7 +97,8 @@
     addTrackedItem(vendor, project, type, ticket) {
       const itemType = type === 'pull' ? 'pulls' : type;
 
-      return this.fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`)
+      return this
+        .fetch(`https://api.github.com/repos/${vendor}/${project}/${itemType}/${ticket}`)
         .then((json) => {
           chrome.storage.sync.get('trackedItems', (storage) => {
             const trackedItems = storage.trackedItems || {};

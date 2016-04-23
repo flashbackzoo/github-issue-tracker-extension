@@ -86,43 +86,30 @@
      *
      * @return {Promise}
      */
-    createAvatarElement() {
+    createProfileElement() {
       return new Promise((resolve) => {
-        chrome.storage.sync.get('avatarUrl', (storage) => {
-          if (typeof storage.avatarUrl === 'undefined') {
-            resolve(null);
-          }
+        this
+          .tracker
+          .getUser()
+          .then((user) => {
+            const userElement = document.createElement('div');
+            const avatarElement = document.createElement('img');
+            const loginElement = document.createElement('p');
 
-          const avatarElement = document.createElement('img');
+            userElement.className = 'user';
 
-          avatarElement.className = 'avatar';
-          avatarElement.src = storage.avatarUrl;
-          avatarElement.width = 30;
+            avatarElement.className = 'user__avatar';
+            avatarElement.src = user.avatarUrl;
+            avatarElement.width = 30;
 
-          resolve(avatarElement);
-        });
-      });
-    }
+            loginElement.className = 'user__login';
+            loginElement.textContent = user.login;
 
-    /**
-     * Creates a paragraph element which displays the user's GitHub handle.
-     *
-     * @return {Promise}
-     */
-    createUsernameElement() {
-      return new Promise((resolve) => {
-        chrome.storage.sync.get('username', (storage) => {
-          if (typeof storage.username === 'undefined') {
-            resolve(null);
-          }
+            userElement.appendChild(avatarElement);
+            userElement.appendChild(loginElement);
 
-          const usernameElement = document.createElement('p');
-
-          usernameElement.className = 'username';
-          usernameElement.textContent = storage.username;
-
-          resolve(usernameElement);
-        });
+            resolve(userElement);
+          });
       });
     }
 
@@ -240,20 +227,15 @@
      */
     renderContentView() {
       let addButtonElement = null;
-      let avatarElement = null;
-      let usernameElement = null;
+      let profileElement = null;
 
       this.createAddButtonElement()
         .then((element) => {
           addButtonElement = element;
-          return this.createAvatarElement();
+          return this.createProfileElement();
         })
         .then((element) => {
-          avatarElement = element;
-          return this.createUsernameElement();
-        })
-        .then((element) => {
-          usernameElement = element;
+          profileElement = element;
           return this.createTrackedItemsListElement();
         })
         .then((trackedItemsListElement) => {
@@ -271,14 +253,7 @@
           actionsContainer.appendChild(addButtonElement);
           actionsWrapper.appendChild(actionsContainer);
 
-          if (avatarElement !== null) {
-            profileContainer.appendChild(avatarElement);
-          }
-
-          if (usernameElement !== null) {
-            profileContainer.appendChild(usernameElement);
-          }
-
+          profileContainer.appendChild(profileElement);
           profileWrapper.appendChild(profileContainer);
 
           trackedItemsContainer.appendChild(trackedItemsListElement);
@@ -292,24 +267,11 @@
 
     // Render a view based on whether or not an OAuth token is set.
     chrome.storage.sync.get('oauthToken', (storage) => {
-      // If no OAuth token is set render the setup view.
       if (typeof storage.oauthToken === 'undefined') {
         popup.renderSetupView();
-        return;
+      } else {
+        popup.renderContentView();
       }
-
-      // If an OAuth token is set but authentication hasn't happened,
-      // authenticate then render the content view.
-      if (popup.tracker.authenticated === false) {
-        popup.tracker.authenticate(storage.oauthToken)
-          .then(() => {
-            popup.renderContentView();
-          });
-        return;
-      }
-
-      // The user has an OAuth token and has authenticated.
-      popup.renderContentView();
     });
 
     // Update the tracked items list when an item is added or removed.

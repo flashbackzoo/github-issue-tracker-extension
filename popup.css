@@ -18,12 +18,12 @@
   border-bottom: 1px solid #ddd;
 }
 
-.avatar {
+.user__avatar {
   display: inline-block;
   vertical-align: middle;
 }
 
-.username {
+.user__login {
   display: inline-block;
   vertical-align: middle;
   margin-bottom: 0;
