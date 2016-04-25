@@ -65,7 +65,7 @@
      *
      * @return {Promise}
      */
-    canTrackCurrentUrl() {
+    getLocationItem() {
       return new Promise((resolve) => {
         chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
           const url = tabs[0].url;

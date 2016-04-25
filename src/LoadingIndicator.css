@@ -1,0 +1,53 @@
+
+.loading-indicator {
+  margin: 0 auto 3em;
+  width: 50px;
+  height: 30px;
+  text-align: center;
+  font-size: 10px;
+}
+
+.loading-indicator__bar {
+  -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+  display: inline-block;
+  width: 4px;
+  height: 100%;
+  margin: 0 1px;
+  background-color: #2196F3;
+  animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+
+.loading-indicator__bar--second {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+
+.loading-indicator__bar--third {
+  -webkit-animation-delay: -1.0s;
+  animation-delay: -1.0s;
+}
+
+.loading-indicator__bar--fourth {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+.loading-indicator__bar--fifth {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+  0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+  20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes sk-stretchdelay {
+  0%, 40%, 100% {
+    transform: scaleY(0.4);
+    -webkit-transform: scaleY(0.4);
+  }  20% {
+    transform: scaleY(1.0);
+    -webkit-transform: scaleY(1.0);
+  }
+}

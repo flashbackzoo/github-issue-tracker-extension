@@ -4,7 +4,7 @@
   "description": "Chrome extension for managing issues and pull requests across multiple repos.",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "cp -r src/ dist/ && browserify -t [ babelify --presets [ react ] ] src/Popup.js -o dist/Popup.js"
   },
   "repository": {
     "type": "git",
@@ -16,9 +16,16 @@
   },
   "homepage": "https://github.com/flashbackzoo/github-wrangler#readme",
   "devDependencies": {
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.2.0",
+    "browserify": "^13.0.0",
     "eslint": "^2.8.0",
     "eslint-config-airbnb": "^7.0.0",
     "eslint-plugin-jsx-a11y": "^0.6.2",
     "eslint-plugin-react": "^4.3.0"
+  },
+  "dependencies": {
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1"
   }
 }
