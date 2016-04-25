@@ -1,281 +1,193 @@
-(() => {
-  class Popup {
-    constructor(tracker) {
-      this.monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ];
+const React = require('react');
+const ReactDOM = require('react-dom');
 
-      this.tracker = tracker;
-    }
+class Popup extends React.Component {
+  constructor(props) {
+    super(props);
 
-    /**
-     * Renders the setup view.
-     */
-    renderSetupView() {
-      const profileWrapperElement = document.getElementById('profile-wrapper');
-      const sectionContainerElement = document.createElement('div');
-      const messageElement = document.createElement('p');
-      const linkElement = document.createElement('a');
+    this.monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
 
-      sectionContainerElement.className = 'setup-container';
+    this.state = {
+      hasToken: false,
+      locationItem: null,
+      syncing: true,
+      trackedItems: [],
+      user: null,
+    };
 
-      messageElement.className = 'setup-message';
-      messageElement
-        .textContent = 'First you need to create a GitHub OAuth token in ';
+    props.store.get('oauthToken', (result) => {
+      this.setState({ hasToken: typeof result.oauthToken !== 'undefined' });
+    });
 
-      linkElement.href = '#';
-      linkElement.textContent = 'options';
-      linkElement.addEventListener('click', () => {
-        chrome.runtime.openOptionsPage();
-      });
+    props.tracker.getUser().then((user) => {
+      this.setState({ user });
+    });
 
-      messageElement.appendChild(linkElement);
-      sectionContainerElement.appendChild(messageElement);
-      profileWrapperElement.appendChild(sectionContainerElement);
-    }
+    props.tracker.getLocationItem().then((locationItem) => {
+      this.setState({ locationItem });
+    });
 
-    /**
-     * Creates a button which adds items to the tracker.
-     *
-     * @return {Promise}
-     */
-    createAddButtonElement() {
-      return new Promise((resolve) => {
-        const addButtonWrapperElement = document.createElement('div');
-        const addButtonElement = document.createElement('button');
-        const addDescriptionElement = document.createElement('span');
+    props.tracker.syncTrackedItems().then((trackedItems) => {
+      this.setState({ syncing: false, trackedItems });
+    });
 
-        addButtonWrapperElement.className = 'add-button-wrapper';
-
-        addButtonElement.className = 'add-button';
-        addButtonElement.type = 'button';
-        addButtonElement.textContent = 'Add to list';
-        addButtonElement.addEventListener('click', () => {
-          this.tracker.canTrackCurrentUrl()
-            .then((item) => {
-              if (item === null) {
-                return;
-              }
-              this
-                .tracker
-                .addTrackedItem(item.vendor, item.project, item.type, item.ticket)
-                .then((result) => {
-                  this.destroyContentView();
-                  this.renderContentView(result);
-                });
-            });
-        });
-
-        addDescriptionElement.className = 'add-button-description';
-
-        return this.tracker.canTrackCurrentUrl()
-          .then((item) => {
-            if (item === null) {
-              addDescriptionElement
-                .textContent = 'Visit a GitHub issue or pull request URL to track it.';
-              addButtonElement.disabled = true;
-            } else {
-              addDescriptionElement.textContent = item.url;
-            }
-
-            addButtonWrapperElement.appendChild(addButtonElement);
-            addButtonWrapperElement.appendChild(addDescriptionElement);
-
-            resolve(addButtonWrapperElement);
-          });
-      });
-    }
-
-    /**
-     * Creates an image element which displays the user's GitHub avatar.
-     *
-     * @return {Promise}
-     */
-    createProfileElement() {
-      return new Promise((resolve) => {
-        this
-          .tracker
-          .getUser()
-          .then((user) => {
-            const userElement = document.createElement('div');
-            const avatarElement = document.createElement('img');
-            const loginElement = document.createElement('p');
-
-            userElement.className = 'user';
-
-            avatarElement.className = 'user__avatar';
-            avatarElement.src = user.avatarUrl;
-            avatarElement.width = 30;
-
-            loginElement.className = 'user__login';
-            loginElement.textContent = user.login;
-
-            userElement.appendChild(avatarElement);
-            userElement.appendChild(loginElement);
-
-            resolve(userElement);
-          });
-      });
-    }
-
-    /**
-     * Creates a list which displays the issues / pull requests the user is currently tracking.
-     *
-     * @param {Array} [trackedItems]
-     * @return {Promise}
-     */
-    createTrackedItemsListElement(trackedItems = []) {
-      return new Promise((resolve) => {
-        const listElement = document.createElement('ul');
-
-        listElement.className = 'tracked-item-list';
-        listElement.id = 'tracked-items';
-
-        if (trackedItems.length === 0) {
-          resolve(listElement);
-          return;
-        }
-
-        trackedItems
-          .sort((a, b) => new Date(b.updated) - new Date(a.updated))
-          .forEach((item) => {
-            const itemElement = document.createElement('li');
-            const itemContainer = document.createElement('div');
-            const repoElement = document.createElement('span');
-            const linkElement = document.createElement('a');
-            const updatedDate = new Date(item.updated);
-            const updatedDay = updatedDate.getDate();
-            const updatedMonth = this.monthNames[updatedDate.getMonth()];
-            const updatedYear = updatedDate.getFullYear();
-            const updatedElement = document.createElement('span');
-            const removeButton = document.createElement('button');
-
-            itemContainer.className = 'tracked-item-list__tracked-item__container';
-
-            itemElement.className = 'tracked-item-list__tracked-item';
-
-            repoElement.className = 'tracked-item-list__tracked-item__repo';
-            repoElement
-              .textContent = `${item.vendor} / ${item.project}`;
-
-            linkElement.className = 'tracked-item-list__tracked-item__link';
-            linkElement.href = item.url;
-            linkElement.target = '_blank';
-            linkElement.textContent = item.title;
-            linkElement.title = 'View on GitHub';
-
-            updatedElement.className = 'tracked-item-list__tracked-item__updated';
-            updatedElement
-              .textContent = `Updated: ${updatedDay} ${updatedMonth} ${updatedYear}`;
-
-            removeButton.type = 'button';
-            removeButton.className = 'tracked-item-list__tracked-item__button';
-            removeButton.innerHTML = '&#10005;';
-            removeButton.dataset.item = item.id;
-            removeButton.title = 'Remove from list';
-            removeButton.addEventListener('click', (event) => {
-              this
-                .tracker
-                .removeTrackedItem(event.target.dataset.item)
-                .then((result) => {
-                  this.destroyContentView();
-                  this.renderContentView(result);
-                });
-            });
-
-            itemContainer.appendChild(repoElement);
-            itemContainer.appendChild(linkElement);
-            itemContainer.appendChild(updatedElement);
-
-            itemElement.appendChild(itemContainer);
-            itemElement.appendChild(removeButton);
-
-            listElement.appendChild(itemElement);
-          });
-
-        resolve(listElement);
-      });
-    }
-
-    /**
-     * Destroys DOM elements created by the `Popup.renderContentView` method.
-     */
-    destroyContentView() {
-      const profileWrapper = document.getElementById('profile-wrapper');
-      const actionsWrapper = document.getElementById('actions-wrapper');
-      const trackedItemsWrapper = document.getElementById('tracked-items-wrapper');
-
-      while (profileWrapper.firstChild) {
-        profileWrapper.removeChild(profileWrapper.firstChild);
-      }
-
-      while (actionsWrapper.firstChild) {
-        actionsWrapper.removeChild(actionsWrapper.firstChild);
-      }
-
-      while (trackedItemsWrapper.firstChild) {
-        trackedItemsWrapper.removeChild(trackedItemsWrapper.firstChild);
-      }
-    }
-
-    /**
-     * Renders the main content view.
-     *
-     * @param {Array} [trackedItems]
-     */
-    renderContentView(trackedItems = []) {
-      let addButtonElement = null;
-      let profileElement = null;
-
-      this.createAddButtonElement()
-        .then((element) => {
-          addButtonElement = element;
-          return this.createProfileElement();
-        })
-        .then((element) => {
-          profileElement = element;
-          return this.createTrackedItemsListElement(trackedItems);
-        })
-        .then((trackedItemsListElement) => {
-          const actionsWrapper = document.getElementById('actions-wrapper');
-          const profileWrapper = document.getElementById('profile-wrapper');
-          const trackedItemsWrapper = document.getElementById('tracked-items-wrapper');
-          const actionsContainer = document.createElement('div');
-          const profileContainer = document.createElement('div');
-          const trackedItemsContainer = document.createElement('div');
-
-          actionsContainer.className = 'actions-container';
-          profileContainer.className = 'profile-container';
-          trackedItemsContainer.className = 'tracked-items-container';
-
-          actionsContainer.appendChild(addButtonElement);
-          actionsWrapper.appendChild(actionsContainer);
-
-          profileContainer.appendChild(profileElement);
-          profileWrapper.appendChild(profileContainer);
-
-          trackedItemsContainer.appendChild(trackedItemsListElement);
-          trackedItemsWrapper.appendChild(trackedItemsContainer);
-        });
-    }
+    this.handleOptionsLinkClick = this.handleOptionsLinkClick.bind(this);
+    this.handleAddButtonClick = this.handleAddButtonClick.bind(this);
+    this.handleRemoveButtonClick = this.handleRemoveButtonClick.bind(this);
   }
 
-  // Called when the popup is opened.
-  document.addEventListener('DOMContentLoaded', () => {
-    chrome.storage.sync.get('oauthToken', (storage) => {
-      const popup = new Popup(chrome.extension.getBackgroundPage().APP.tracker);
+  handleOptionsLinkClick() {
+    this.props.runtime.openOptionsPage();
+  }
 
-      if (typeof storage.oauthToken === 'undefined') {
-        popup.renderSetupView();
-      } else {
-        popup
-          .tracker
-          .syncTrackedItems()
-          .then((trackedItems) => {
-            popup.renderContentView(trackedItems);
-          });
-      }
-    });
-  });
-})();
+  handleAddButtonClick() {
+    if (this.state.locationItem === null) {
+      return;
+    }
+
+    this.props.tracker
+      .addTrackedItem(
+        this.state.locationItem.vendor,
+        this.state.locationItem.project,
+        this.state.locationItem.type,
+        this.state.locationItem.ticket
+      )
+      .then((trackedItems) => {
+        this.setState({ trackedItems });
+      });
+  }
+
+  handleRemoveButtonClick(event) {
+    this.props.tracker
+      .removeTrackedItem(event.target.dataset.id)
+      .then((trackedItems) => {
+        this.setState({ trackedItems });
+      });
+  }
+
+  renderSetupView() {
+    return (
+      <div className="setup-container">
+        <p className="setup-message">
+          First you need to create a GitHub OAuth token in
+           <a href="#" onClick={this.handleOptionsLinkClick}>options</a>.
+        </p>
+      </div>
+    );
+  }
+
+  renderContentView() {
+    return (
+      <div className="popup">
+        {this.state.user &&
+          <div className="profile-container">
+            <div className="user">
+              <img
+                className="user__avatar"
+                alt={this.state.user.login}
+                src={this.state.user.avatarUrl}
+                width="30"
+              />
+              <p className="user__login">{this.state.user.login}</p>
+            </div>
+          </div>
+        }
+
+        <div className="actions-container">
+          <div className="add-button-wrapper">
+            <button
+              className="add-button"
+              type="button"
+              disabled={this.state.locationItem === null}
+              onClick={this.handleAddButtonClick}
+            >
+              Add to list
+            </button>
+            {this.state.locationItem &&
+              <p className="add-button-description">
+                {this.state.locationItem.url}
+              </p>
+            }
+            {!this.state.locationItem &&
+              <p className="add-button-description">
+                Visit a GitHub issue or pull request URL to track it.
+              </p>
+            }
+          </div>
+        </div>
+
+        {this.state.trackedItems &&
+          <div className="tracked-items-container">
+            <ul className="tracked-item-list">
+              {this.state.trackedItems
+                .sort((a, b) => new Date(b.updated) - new Date(a.updated))
+                .map((item) => {
+                  const updated = new Date(item.updated);
+                  const updatedDay = updated.getDate();
+                  const updatedMonth = this.monthNames[updated.getMonth()];
+                  const updatedYear = updated.getFullYear();
+
+                  return (
+                    <li className="tracked-item-list__tracked-item" key={item.id}>
+                      <span className="tracked-item-list__tracked-item__container">
+                        <span className="tracked-item-list__tracked-item__repo">
+                          {`${item.vendor} / ${item.project}`}
+                        </span>
+                        <a
+                          className="tracked-item-list__tracked-item__link"
+                          href={item.url}
+                          target="_blank"
+                          title="View on GitHub"
+                        >
+                          {item.title}
+                        </a>
+                        <span className="tracked-item-list__tracked-item__updated">
+                          {`Updated: ${updatedDay} ${updatedMonth} ${updatedYear}`}
+                        </span>
+                      </span>
+                      <button
+                        className="tracked-item-list__tracked-item__button"
+                        title="Remove from list"
+                        type="button"
+                        data-id={item.id}
+                        onClick={this.handleRemoveButtonClick}
+                      >
+                       x
+                      </button>
+                    </li>
+                  );
+                })
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    );
+  }
+
+  render() {
+    return this.state.hasToken
+      ? this.renderContentView()
+      : this.renderSetupView();
+  }
+}
+
+Popup.propTypes = {
+  runtime: React.PropTypes.object.isRequired,
+  store: React.PropTypes.object.isRequired,
+  tracker: React.PropTypes.object.isRequired,
+};
+
+// Called when the popup is opened.
+document.addEventListener('DOMContentLoaded', () => {
+  const props = {
+    runtime: chrome.runtime,
+    store: chrome.storage.sync,
+    tracker: chrome.extension.getBackgroundPage().APP.tracker,
+  };
+
+  ReactDOM.render(<Popup {...props} />, document.getElementById('popup-view'));
+});
