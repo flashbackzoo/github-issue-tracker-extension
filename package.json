@@ -4,7 +4,7 @@
   "description": "Chrome extension for managing issues and pull requests across multiple repos.",
   "main": "main.js",
   "scripts": {
-    "build": "browserify -t [ babelify --presets [ react ] ] popup.js -o bundle.js"
+    "build": "cp -r src/ dist/ && browserify -t [ babelify --presets [ react ] ] src/Popup.js -o dist/Popup.js"
   },
   "repository": {
     "type": "git",

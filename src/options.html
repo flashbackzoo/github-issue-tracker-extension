@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <title>GitHub Issue Tracker</title>
+    <link rel="stylesheet" href="marx.css" />
+    <link rel="stylesheet" href="options.css" />
+    <script src="options.js"></script>
+  </head>
+  <body id="options-view">
+    <div>
+      <h2>Options</h2>
+      <label for="oauth-token">OAuth token</label>
+      <input id="oauth-token" type="password" required />
+      <p>
+        <a
+          id="gh_link"
+          href="https://github.com/settings/tokens/new?scopes=user&description=GitHub Wrangler"
+          target="_blank">
+          Create a token
+        </a> with the <strong>user</strong> permission and specify it.
+      </p>
+      <div id="status-wrapper"></div>
+      <div>
+        <button id="save-button" type="button">Save</button>
+      </div>
+    </div>
+  </body>
+</html>
