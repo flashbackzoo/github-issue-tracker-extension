@@ -87,24 +87,6 @@
     }
 
     /**
-     * Creates a tracked item from GitHub API response JSON.
-     *
-     * @param {Object} json - Response body from an issue or pull request endpoint.
-     */
-    createTrackedItemFromSchema(json) {
-      return {
-        endpoint: json.url,
-        id: json.id,
-        project: json.base.repo.name,
-        title: json.title,
-        type: json.type,
-        updated: json.updated_at,
-        url: json.html_url,
-        vendor: json.base.user.login,
-      };
-    }
-
-    /**
      * Converts an object to an array.
      *
      * @param {Object}
@@ -154,9 +136,17 @@
           .then((json) => {
             chrome.storage.sync.get('trackedItems', (storage) => {
               const trackedItems = storage.trackedItems || {};
-              const item = this.createTrackedItemFromSchema(json);
 
-              trackedItems[json.id] = item;
+              trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+                endpoint: json.url,
+                id: json.id,
+                project,
+                title: json.title,
+                type,
+                updated: json.updated_at,
+                url: json.html_url,
+                vendor,
+              });
 
               chrome.storage.sync.set({ trackedItems }, () => {
                 resolve(this.objectToArray(trackedItems));
@@ -203,9 +193,10 @@
             reject();
           }
 
-          const item = this.createTrackedItemFromSchema(json);
-
-          trackedItems[json.id] = item;
+          trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+            title: json.title,
+            updated: json.updated_at,
+          });
 
           chrome.storage.sync.set({ trackedItems }, () => {
             resolve(this.objectToArray(trackedItems));
