@@ -1,5 +1,6 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
+const LoadingIndicator = require('./LoadingIndicator.js');
 
 class Popup extends React.Component {
   constructor(props) {
@@ -11,6 +12,7 @@ class Popup extends React.Component {
     ];
 
     this.state = {
+      addingItem: false,
       hasToken: false,
       locationItem: null,
       syncing: true,
@@ -56,8 +58,13 @@ class Popup extends React.Component {
         this.state.locationItem.ticket
       )
       .then((trackedItems) => {
-        this.setState({ trackedItems });
+        this.setState({
+          addingItem: false,
+          trackedItems,
+        });
       });
+
+    this.setState({ addingItem: true });
   }
 
   handleRemoveButtonClick(event) {
@@ -101,10 +108,15 @@ class Popup extends React.Component {
             <button
               className="add-button"
               type="button"
-              disabled={this.state.locationItem === null}
+              disabled={this.state.locationItem === null || this.state.addingItem}
               onClick={this.handleAddButtonClick}
             >
-              Add to list
+              {this.state.addingItem &&
+                <LoadingIndicator />
+              }
+              {!this.state.addingItem &&
+                <span>Add to list</span>
+              }
             </button>
             {this.state.locationItem &&
               <p className="add-button-description">
@@ -119,7 +131,13 @@ class Popup extends React.Component {
           </div>
         </div>
 
-        {this.state.trackedItems &&
+        {this.state.syncing &&
+          <div className="tracked-items-container">
+            <LoadingIndicator showText />
+          </div>
+        }
+
+        {!this.state.syncing && this.state.trackedItems.length > 0 &&
           <div className="tracked-items-container">
             <ul className="tracked-item-list">
               {this.state.trackedItems

@@ -55,6 +55,14 @@
   background: #8BC34A;
 }
 
+.add-button .loading-indicator {
+  margin-bottom: 0;
+}
+
+.add-button .loading-indicator__bar {
+  background-color: #9E9E9E;
+}
+
 .tracked-item-list {
   padding-top: 1em;
   padding-left: 0;
@@ -76,7 +84,8 @@
 .tracked-item-list__tracked-item__container {
   display: inline-block;
   vertical-align: middle;
-  width: 430px;
+  width: 420px;
+  margin-right: 20px;
 }
 
 .tracked-item-list__tracked-item__repo {

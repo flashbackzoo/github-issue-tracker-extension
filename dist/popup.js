@@ -19363,7 +19363,30 @@ module.exports = require('./lib/React');
 
 },{"./lib/React":26}],166:[function(require,module,exports){
 const React = require('react');
+
+function LoadingIndicator(props = { showText: false }) {
+  return React.createElement(
+    "div",
+    { className: "loading-indicator" },
+    React.createElement("div", { className: "loading-indicator__bar loading-indicator__bar--first" }),
+    React.createElement("div", { className: "loading-indicator__bar loading-indicator__bar--second" }),
+    React.createElement("div", { className: "loading-indicator__bar loading-indicator__bar--third" }),
+    React.createElement("div", { className: "loading-indicator__bar loading-indicator__bar--fourth" }),
+    React.createElement("div", { className: "loading-indicator__bar loading-indicator__bar--fifth" }),
+    props.showText && React.createElement(
+      "p",
+      null,
+      "Updating"
+    )
+  );
+}
+
+module.exports = LoadingIndicator;
+
+},{"react":165}],167:[function(require,module,exports){
+const React = require('react');
 const ReactDOM = require('react-dom');
+const LoadingIndicator = require('./LoadingIndicator.js');
 
 class Popup extends React.Component {
   constructor(props) {
@@ -19372,6 +19395,7 @@ class Popup extends React.Component {
     this.monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     this.state = {
+      addingItem: false,
       hasToken: false,
       locationItem: null,
       syncing: true,
@@ -19410,8 +19434,13 @@ class Popup extends React.Component {
     }
 
     this.props.tracker.addTrackedItem(this.state.locationItem.vendor, this.state.locationItem.project, this.state.locationItem.type, this.state.locationItem.ticket).then(trackedItems => {
-      this.setState({ trackedItems });
+      this.setState({
+        addingItem: false,
+        trackedItems
+      });
     });
+
+    this.setState({ addingItem: true });
   }
 
   handleRemoveButtonClick(event) {
@@ -19472,10 +19501,15 @@ class Popup extends React.Component {
             {
               className: 'add-button',
               type: 'button',
-              disabled: this.state.locationItem === null,
+              disabled: this.state.locationItem === null || this.state.addingItem,
               onClick: this.handleAddButtonClick
             },
-            'Add to list'
+            this.state.addingItem && React.createElement(LoadingIndicator, null),
+            !this.state.addingItem && React.createElement(
+              'span',
+              null,
+              'Add to list'
+            )
           ),
           this.state.locationItem && React.createElement(
             'p',
@@ -19489,7 +19523,12 @@ class Popup extends React.Component {
           )
         )
       ),
-      this.state.trackedItems && React.createElement(
+      this.state.syncing && React.createElement(
+        'div',
+        { className: 'tracked-items-container' },
+        React.createElement(LoadingIndicator, { showText: true })
+      ),
+      !this.state.syncing && this.state.trackedItems.length > 0 && React.createElement(
         'div',
         { className: 'tracked-items-container' },
         React.createElement(
@@ -19568,4 +19607,4 @@ document.addEventListener('DOMContentLoaded', () => {
   ReactDOM.render(React.createElement(Popup, props), document.getElementById('popup-view'));
 });
 
-},{"react":165,"react-dom":2}]},{},[166]);
+},{"./LoadingIndicator.js":166,"react":165,"react-dom":2}]},{},[167]);
