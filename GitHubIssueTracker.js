@@ -87,6 +87,36 @@
     }
 
     /**
+     * Creates a tracked item from GitHub API response JSON.
+     *
+     * @param {Object} json - Response body from an issue or pull request endpoint.
+     */
+    createTrackedItemFromSchema(json) {
+      return {
+        endpoint: json.url,
+        id: json.id,
+        project: json.base.repo.name,
+        title: json.title,
+        type: json.type,
+        updated: json.updated_at,
+        url: json.html_url,
+        vendor: json.base.user.login,
+      };
+    }
+
+    /**
+     * Converts an object to an array.
+     *
+     * @param {Object}
+     * @return {Array}
+     */
+    objectToArray(obj) {
+      return Object
+        .keys(obj)
+        .reduce((result, key) => result.concat([obj[key]]), []);
+    }
+
+    /**
      * Gets all items currently being tracked.
      *
      * @return {Promise}
@@ -98,23 +128,10 @@
 
           if (typeof items === 'undefined' || Object.keys(items).length === 0) {
             resolve([]);
+            return;
           }
 
-          const itemList = Object
-            .keys(items)
-            .reduce((result, key) => {
-              result.push({
-                id: key,
-                project: items[key].project,
-                title: items[key].title,
-                updated: items[key].updated,
-                vendor: items[key].vendor,
-                url: items[key].url,
-              });
-              return result;
-            }, []);
-
-          resolve(itemList);
+          resolve(this.objectToArray(items));
         });
       });
     }
@@ -137,19 +154,12 @@
           .then((json) => {
             chrome.storage.sync.get('trackedItems', (storage) => {
               const trackedItems = storage.trackedItems || {};
-              const item = {
-                project,
-                title: json.title,
-                type,
-                updated: json.updated_at,
-                url: json.html_url,
-                vendor,
-              };
+              const item = this.createTrackedItemFromSchema(json);
 
               trackedItems[json.id] = item;
 
               chrome.storage.sync.set({ trackedItems }, () => {
-                resolve(item);
+                resolve(this.objectToArray(trackedItems));
               });
             });
           });
@@ -170,9 +180,69 @@
           delete trackedItems[id];
 
           chrome.storage.sync.set({ trackedItems }, () => {
-            resolve();
+            resolve(this.objectToArray(trackedItems));
           });
         });
+      });
+    }
+
+    /**
+     * Updates a tracked item.
+     *
+     * @return {Promise}
+     */
+    updateTrackedItem(json) {
+      return new Promise((resolve, reject) => {
+        chrome.storage.sync.get('trackedItems', (storage) => {
+          const trackedItems = storage.trackedItems;
+
+          if (
+            typeof trackedItems === 'undefined' ||
+            typeof trackedItems[json.id] === 'undefined'
+          ) {
+            reject();
+          }
+
+          const item = this.createTrackedItemFromSchema(json);
+
+          trackedItems[json.id] = item;
+
+          chrome.storage.sync.set({ trackedItems }, () => {
+            resolve(this.objectToArray(trackedItems));
+          });
+        });
+      });
+    }
+
+    /**
+     * Syncs all tracked items with GitHub.
+     *
+     * @return {Promise}
+     */
+    syncTrackedItems() {
+      return new Promise((resolve, reject) => {
+        this
+          .getTrackedItems()
+          .then((items) => {
+            if (items.length === 0) {
+              resolve(items);
+              return;
+            }
+            // Fetch data for all tracked items.
+            Promise
+              .all(items.map((item) => this.fetch(item.endpoint)))
+              .then((updates) => {
+                // Update the store with the fetched data.
+                Promise
+                  .all(updates.map((json) => this.updateTrackedItem(json)))
+                  .then((updatedItems) => {
+                    resolve(updatedItems[items.length - 1]);
+                  });
+              })
+              .catch(() => {
+                reject();
+              });
+          });
       });
     }
   }
