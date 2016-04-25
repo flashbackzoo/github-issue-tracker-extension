@@ -7,7 +7,7 @@ But if you want to try it out anyway, here's how...
 
 ## Installation
 
-1. Clone the repo `$ git clone https://github.com/flashbackzoo/github-wrangler-extension.git`
+1. Clone the repo `$ git clone https://github.com/flashbackzoo/github-wrangler.git`
 2. Visit `chrome://extensions` in your browser
 3. Ensure that the __Developer mode__ checkbox in the top right-hand corner is checked.
 4. Click __Load unpacked extension...__ to pop up a file-selection dialog.

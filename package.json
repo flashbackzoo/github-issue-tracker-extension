@@ -1,5 +1,5 @@
 {
-  "name": "github-wrangler-extension",
+  "name": "github-wrangler",
   "version": "1.0.0",
   "description": "Chrome extension for managing issues and pull requests across multiple repos.",
   "main": "main.js",
@@ -8,13 +8,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/flashbackzoo/github-wrangler-extension.git"
+    "url": "git+https://github.com/flashbackzoo/github-wrangler.git"
   },
   "author": "David Craig <david@davidcraig.co.nz>",
   "bugs": {
-    "url": "https://github.com/flashbackzoo/github-wrangler-extension/issues"
+    "url": "https://github.com/flashbackzoo/github-wrangler/issues"
   },
-  "homepage": "https://github.com/flashbackzoo/github-wrangler-extension#readme",
+  "homepage": "https://github.com/flashbackzoo/github-wrangler#readme",
   "devDependencies": {
     "eslint": "^2.8.0",
     "eslint-config-airbnb": "^7.0.0",
