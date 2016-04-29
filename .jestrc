@@ -1,0 +1,13 @@
+{
+  "modulePathIgnorePatterns": [
+    "node_modules"
+  ],
+  "scriptPreprocessor": "<rootDir>/node_modules/babel-jest",
+  "setupEnvScriptFile": "jestBootstrap.js",
+  "testPathDirs": [
+    "src"
+  ],
+  "unmockedModulePathPatterns": [
+    "<rootDir>/node_modules"
+  ]
+}

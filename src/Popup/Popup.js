@@ -1,6 +1,7 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-const LoadingIndicator = require('./LoadingIndicator.js');
+const Backend = require('../Backend/Backend.js');
+const LoadingIndicator = require('../LoadingIndicator/LoadingIndicator.js');
 
 class Popup extends React.Component {
   constructor(props) {
@@ -20,19 +21,19 @@ class Popup extends React.Component {
       user: null,
     };
 
-    props.store.get('oauthToken', (result) => {
+    props.chrome.storage.sync.get('oauthToken', (result) => {
       this.setState({ hasToken: typeof result.oauthToken !== 'undefined' });
     });
 
-    props.tracker.getUser().then((user) => {
+    props.backend.getUser().then((user) => {
       this.setState({ user });
     });
 
-    props.tracker.getLocationItem().then((locationItem) => {
+    props.backend.getLocationItem().then((locationItem) => {
       this.setState({ locationItem });
     });
 
-    props.tracker.syncTrackedItems().then((trackedItems) => {
+    props.backend.syncTrackedItems().then((trackedItems) => {
       this.setState({ syncing: false, trackedItems });
     });
 
@@ -42,7 +43,7 @@ class Popup extends React.Component {
   }
 
   handleOptionsLinkClick() {
-    this.props.runtime.openOptionsPage();
+    this.props.chrome.runtime.openOptionsPage();
   }
 
   handleAddButtonClick() {
@@ -50,7 +51,7 @@ class Popup extends React.Component {
       return;
     }
 
-    this.props.tracker
+    this.props.backend
       .addTrackedItem(
         this.state.locationItem.vendor,
         this.state.locationItem.project,
@@ -68,7 +69,7 @@ class Popup extends React.Component {
   }
 
   handleRemoveButtonClick(event) {
-    this.props.tracker
+    this.props.backend
       .removeTrackedItem(event.target.dataset.id)
       .then((trackedItems) => {
         this.setState({ trackedItems });
@@ -194,17 +195,15 @@ class Popup extends React.Component {
 }
 
 Popup.propTypes = {
-  runtime: React.PropTypes.object.isRequired,
-  store: React.PropTypes.object.isRequired,
-  tracker: React.PropTypes.object.isRequired,
+  backend: React.PropTypes.object.isRequired,
+  chrome: React.PropTypes.object.isRequired,
 };
 
 // Called when the popup is opened.
 document.addEventListener('DOMContentLoaded', () => {
   const props = {
-    runtime: chrome.runtime,
-    store: chrome.storage.sync,
-    tracker: chrome.extension.getBackgroundPage().APP.tracker,
+    backend: new Backend(),
+    chrome,
   };
 
   ReactDOM.render(<Popup {...props} />, document.getElementById('popup-view'));
