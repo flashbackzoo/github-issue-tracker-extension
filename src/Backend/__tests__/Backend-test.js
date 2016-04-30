@@ -2,11 +2,7 @@
 
 jest.unmock('../Backend.js');
 
-const Backend = require('../Backend.js');
-
 describe('Backend', () => {
-  const backend = new Backend();
-
   describe('getUser()', () => {
     it('should get user data from storage', () => {
 

@@ -2,6 +2,8 @@
   "extends": "airbnb",
   "globals": {
     "chrome": true,
+    "describe": true,
+    "jest": true,
   },
   "rules": {
     "no-multi-str": "off"

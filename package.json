@@ -8,6 +8,7 @@
     "browserify": "gulp browserify",
     "copy": "gulp copy",
     "css": "gulp css",
+    "lint": "eslint ./gulpfile.js & eslint ./src",
     "lock": "npm-shrinkwrap --dev",
     "test": "jest --config .jestrc"
   },
