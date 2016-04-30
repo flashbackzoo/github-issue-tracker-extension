@@ -135,11 +135,17 @@
 .tracked-item-list__tracked-item:last-child {
   margin-bottom: 0; }
 
-.tracked-item-list__tracked-item__container {
+.tracked-item-list__tracked-item__container, .tracked-item-list__tracked-item__container--changes {
   display: inline-block;
   vertical-align: middle;
   width: 420px;
   margin-right: 20px; }
+
+.tracked-item-list__tracked-item__container--changes {
+  border-left: 6px solid #2196F3;
+  padding-left: 10px; }
+  .tracked-item-list__tracked-item__container--changes .tracked-item-list__tracked-item__link {
+    max-width: 384px; }
 
 .tracked-item-list__tracked-item__repo {
   display: block;

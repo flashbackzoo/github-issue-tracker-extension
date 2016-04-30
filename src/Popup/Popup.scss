@@ -91,6 +91,16 @@
   margin-right: 20px;
 }
 
+.tracked-item-list__tracked-item__container--changes {
+  @extend .tracked-item-list__tracked-item__container;
+  border-left: 6px solid #2196F3;
+  padding-left: 10px;
+
+  .tracked-item-list__tracked-item__link {
+    max-width: 384px;
+  }
+}
+
 .tracked-item-list__tracked-item__repo {
   display: block;
   margin-bottom: .2em;

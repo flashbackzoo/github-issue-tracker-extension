@@ -19298,7 +19298,7 @@ var Backend = function () {
             var trackedItems = storage.trackedItems || {};
 
             trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
-              endpoint: json.url,
+              hasChanges: false,
               id: json.id,
               mergeable: json.mergeable === void 0 ? false : json.mergeable,
               mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
@@ -19307,8 +19307,9 @@ var Backend = function () {
               state: json.state,
               title: json.title,
               type: type,
-              updated: json.updated_at,
-              url: json.html_url,
+              updatedAt: json.updated_at,
+              url: json.url,
+              htmlUrl: json.html_url,
               vendor: vendor
             });
 
@@ -19365,12 +19366,13 @@ var Backend = function () {
           }
 
           trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+            hasChanges: new Date(json.updated_at) > new Date(trackedItems[json.id].updatedAt),
             mergeable: json.mergeable === void 0 ? false : json.mergeable,
             mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
             merged: json.merged === void 0 ? false : json.merged,
             state: json.state,
             title: json.title,
-            updated: json.updated_at
+            updatedAt: json.updated_at
           });
 
           chrome.storage.sync.set({ trackedItems: trackedItems }, function () {
@@ -19399,7 +19401,7 @@ var Backend = function () {
           }
           // Fetch data for all tracked items.
           Promise.all(items.map(function (item) {
-            return _this6.fetch(item.endpoint);
+            return _this6.fetch(item.url);
           })).then(function (updates) {
             // Update the store with the fetched data.
             Promise.all(updates.map(function (json) {
@@ -19647,19 +19649,20 @@ var Popup = function (_React$Component) {
             'ul',
             { className: 'tracked-item-list' },
             this.state.trackedItems.sort(function (a, b) {
-              return new Date(b.updated) - new Date(a.updated);
+              return new Date(b.updatedAt) - new Date(a.updatedAt);
             }).map(function (item) {
-              var updated = new Date(item.updated);
+              var updated = new Date(item.updatedAt);
               var updatedDay = updated.getDate();
               var updatedMonth = _this4.monthNames[updated.getMonth()];
               var updatedYear = updated.getFullYear();
+              var containerClass = item.hasChanges ? 'tracked-item-list__tracked-item__container--changes' : 'tracked-item-list__tracked-item__container';
 
               return _react2.default.createElement(
                 'li',
                 { className: 'tracked-item-list__tracked-item', key: item.id },
                 _react2.default.createElement(
                   'span',
-                  { className: 'tracked-item-list__tracked-item__container' },
+                  { className: containerClass },
                   _react2.default.createElement(
                     'span',
                     { className: 'tracked-item-list__tracked-item__repo' },
@@ -19676,7 +19679,7 @@ var Popup = function (_React$Component) {
                     'a',
                     {
                       className: 'tracked-item-list__tracked-item__link',
-                      href: item.url,
+                      href: item.htmlUrl,
                       target: '_blank',
                       title: 'View on GitHub'
                     },
