@@ -15,4 +15,8 @@ function LoadingIndicator(props = { showText: false }) {
   );
 }
 
+LoadingIndicator.propTypes = {
+  showText: React.PropTypes.bool,
+};
+
 module.exports = LoadingIndicator;

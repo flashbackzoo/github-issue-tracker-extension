@@ -139,6 +139,8 @@ class Backend {
             trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
               endpoint: json.url,
               id: json.id,
+              mergeable: json.mergeable === void 0 ? false : json.mergeable,
+              mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
               merged: json.merged === void 0 ? false : json.merged,
               project,
               state: json.state,
@@ -195,6 +197,8 @@ class Backend {
         }
 
         trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+          mergeable: json.mergeable === void 0 ? false : json.mergeable,
+          mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
           merged: json.merged === void 0 ? false : json.merged,
           state: json.state,
           title: json.title,

@@ -16,8 +16,14 @@ function TypeIcon(props) {
       0.88 4.5 2.2l0.92-0.92C12.14 2 10.19 1 8 1 4.14 1 1 4.14 1 8s3.14 7 7 7 7-3.14 7-7l-1.52 \
       1.52c-0.66 2.41-2.86 4.19-5.48 4.19z';
   } else if (props.type === 'pull') {
-    if (props.state === 'open') {
+    if (props.state === 'open' && props.mergeable && props.mergeableState === 'clean') {
       className = 'type-icon--pull-open';
+    } else if (props.state === 'open' && props.mergeable && props.mergeableState === 'dirty') {
+      className = 'type-icon--pull-dirty';
+    } else if (props.state === 'open' && props.mergeable && props.mergeableState === 'unstable') {
+      className = 'type-icon--pull-unstable';
+    } else if (props.state === 'open' && !props.mergeable) {
+      className = 'type-icon--pull-unmergeable';
     } else if (props.state === 'closed' && !props.merged) {
       className = 'type-icon--pull-closed';
     } else if (props.merged) {
@@ -51,6 +57,8 @@ function TypeIcon(props) {
 }
 
 TypeIcon.propTypes = {
+  mergeable: React.PropTypes.bool.isRequired,
+  mergeableState: React.PropTypes.string.isRequired,
   merged: React.PropTypes.bool.isRequired,
   state: React.PropTypes.string.isRequired,
   type: React.PropTypes.string.isRequired,

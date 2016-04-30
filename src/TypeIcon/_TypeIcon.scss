@@ -1,6 +1,7 @@
 $closed-color: #F44336;
 $merged-color: #9C27B0;
 $open-color: #4CAF50;
+$warning-color: #FF9800;
 
 .type-icon {
   margin: 0 4px .1em 0;
@@ -21,4 +22,11 @@ $open-color: #4CAF50;
 .type-icon--pull-merged {
   @extend .type-icon;
   color: $merged-color;
+}
+
+.type-icon--pull-dirty,
+.type-icon--pull-unstable,
+.type-icon--pull-unmergeable {
+  @extend .type-icon;
+  color: $warning-color;
 }

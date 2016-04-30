@@ -46,7 +46,9 @@
 
 .type-icon, .type-icon--issue-open,
 .type-icon--pull-open, .type-icon--issue-closed,
-.type-icon--pull-closed, .type-icon--pull-merged {
+.type-icon--pull-closed, .type-icon--pull-merged, .type-icon--pull-dirty,
+.type-icon--pull-unstable,
+.type-icon--pull-unmergeable {
   margin: 0 4px .1em 0; }
 
 .type-icon--issue-open,
@@ -59,6 +61,11 @@
 
 .type-icon--pull-merged {
   color: #9C27B0; }
+
+.type-icon--pull-dirty,
+.type-icon--pull-unstable,
+.type-icon--pull-unmergeable {
+  color: #FF9800; }
 
 #popup-view {
   width: 500px;

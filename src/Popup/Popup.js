@@ -156,7 +156,13 @@ class Popup extends React.Component {
                         <span className="tracked-item-list__tracked-item__repo">
                           {`${item.vendor} / ${item.project}`}
                         </span>
-                        <TypeIcon merged={item.merged} state={item.state} type={item.type} />
+                        <TypeIcon
+                          mergeable={item.mergeable}
+                          mergeableState={item.mergeableState}
+                          merged={item.merged}
+                          state={item.state}
+                          type={item.type}
+                        />
                         <a
                           className="tracked-item-list__tracked-item__link"
                           href={item.url}
