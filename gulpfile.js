@@ -4,11 +4,24 @@ const buffer = require('vinyl-buffer');
 const cleancss = require('gulp-clean-css');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
+const packageJson = require('./package.json');
 const sass = require('gulp-sass');
+const semver = require('semver');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const uglify = require('gulp-uglify');
 const watch = require('gulp-watch');
+
+// Make sure the version of Node being used is valid.
+if (!semver.satisfies(process.versions.node, packageJson.engines.node)) {
+  console.error( // eslint-disable-line
+    `
+Invalid Node.js version. You need to be using ${packageJson.engines.node}. \r
+If you want to manage multiple Node.js versions try https://github.com/creationix/nvm
+    `
+  );
+  process.exit(1);
+}
 
 process.env.NODE_ENV = typeof process.env.npm_config_development !== 'undefined'
   ? 'development'

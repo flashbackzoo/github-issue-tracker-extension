@@ -8,7 +8,11 @@
     "browserify": "gulp browserify",
     "copy": "gulp copy",
     "css": "gulp css",
+    "lock": "npm-shrinkwrap --dev",
     "test": "jest --config .jestrc"
+  },
+  "engines": {
+    "node": "^4.2.0"
   },
   "repository": {
     "type": "git",
@@ -37,6 +41,8 @@
     "gulp-util": "^3.0.7",
     "gulp-watch": "^4.3.5",
     "jest-cli": "^11.0.2",
+    "npm-shrinkwrap": "^200.5.1",
+    "semver": "^5.1.0",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
