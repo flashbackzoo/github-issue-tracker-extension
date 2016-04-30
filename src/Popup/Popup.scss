@@ -1,3 +1,5 @@
+@import '../TypeIcon/TypeIcon';
+
 #popup-view {
   width: 500px;
   padding: 1em;
@@ -96,7 +98,9 @@
 }
 
 .tracked-item-list__tracked-item__link {
-  display: inline-block;;
+  display: inline-block;
+  vertical-align: text-top;
+  max-width: 400px;
   margin-bottom: .2em;
   font-size: .9em;
 }
