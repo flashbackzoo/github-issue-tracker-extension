@@ -1,0 +1,24 @@
+$closed-color: #F44336;
+$merged-color: #9C27B0;
+$open-color: #4CAF50;
+
+.type-icon {
+  margin: 0 4px .1em 0;
+}
+
+.type-icon--issue-open,
+.type-icon--pull-open {
+  @extend .type-icon;
+  color: $open-color;
+}
+
+.type-icon--issue-closed,
+.type-icon--pull-closed {
+  @extend .type-icon;
+  color: $closed-color;
+}
+
+.type-icon--pull-merged {
+  @extend .type-icon;
+  color: $merged-color;
+}

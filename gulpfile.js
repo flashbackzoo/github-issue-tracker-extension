@@ -1,7 +1,6 @@
 const babelify = require('babelify');
 const browserify = require('browserify');
 const buffer = require('vinyl-buffer');
-const cleancss = require('gulp-clean-css');
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const notify = require('gulp-notify');
@@ -10,7 +9,6 @@ const sass = require('gulp-sass');
 const semver = require('semver');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
-const uglify = require('gulp-uglify');
 const watchify = require('watchify');
 
 // Make sure the version of Node being used is valid.
@@ -45,13 +43,11 @@ gulp.task('browserify', function bundlePopup() {
     .on('update', bundlePopup)
     .on('log', (msg) => { gutil.log('Finished', `./dist/Popup.js ${msg}`); });
 
-  return b.bundle()
+  b.bundle()
     .on('error', notify.onError({ message: 'Popup.js: <%= error.message %>' }))
     .pipe(source('Popup.js'))
     .pipe(buffer())
     .pipe(sourcemaps.init({ loadMaps: true }))
-      // Add transformation tasks to the pipeline here.
-      .pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./dist/Popup'));
 });
@@ -61,6 +57,8 @@ gulp.task('copy', () => {
     .src([
       '!./src/__mocks__/*.js',
       '!./src/**/*-test.js',
+      '!./src/Backend/*.js',
+      '!./src/LoadingIndicator/*.js',
       '!./src/Popup/*.js',
       '!./src/TypeIcon/*.js',
       './src/**/*.js',
@@ -74,12 +72,12 @@ gulp.task('copy', () => {
 gulp.task('css', () => {
   gulp
     .src([
+      '!./src/LoadingIndicator/*.scss',
       '!./src/TypeIcon/*.scss',
       './src/**/*.scss',
     ])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', notify.onError({ message: '<%= error.message %>' })))
-    .pipe(cleancss())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest('./dist'));
 });

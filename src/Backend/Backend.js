@@ -139,7 +139,9 @@ class Backend {
             trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
               endpoint: json.url,
               id: json.id,
+              merged: json.merged === void 0 ? false : json.merged,
               project,
+              state: json.state,
               title: json.title,
               type,
               updated: json.updated_at,
@@ -193,6 +195,8 @@ class Backend {
         }
 
         trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+          merged: json.merged === void 0 ? false : json.merged,
+          state: json.state,
           title: json.title,
           updated: json.updated_at,
         });
