@@ -19683,7 +19683,7 @@ var Popup = function (_React$Component) {
                     'data-id': item.id,
                     onClick: _this4.handleRemoveButtonClick
                   },
-                  'x'
+                  String.fromCharCode(215)
                 )
               );
             })

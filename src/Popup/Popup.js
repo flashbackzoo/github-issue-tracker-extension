@@ -176,7 +176,7 @@ class Popup extends React.Component {
                         data-id={item.id}
                         onClick={this.handleRemoveButtonClick}
                       >
-                       x
+                       {String.fromCharCode(215)}
                       </button>
                     </li>
                   );
