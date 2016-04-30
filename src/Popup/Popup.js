@@ -143,16 +143,19 @@ class Popup extends React.Component {
           <div className="tracked-items-container">
             <ul className="tracked-item-list">
               {this.state.trackedItems
-                .sort((a, b) => new Date(b.updated) - new Date(a.updated))
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                 .map((item) => {
-                  const updated = new Date(item.updated);
+                  const updated = new Date(item.updatedAt);
                   const updatedDay = updated.getDate();
                   const updatedMonth = this.monthNames[updated.getMonth()];
                   const updatedYear = updated.getFullYear();
+                  const containerClass = item.hasChanges
+                    ? 'tracked-item-list__tracked-item__container--changes'
+                    : 'tracked-item-list__tracked-item__container';
 
                   return (
                     <li className="tracked-item-list__tracked-item" key={item.id}>
-                      <span className="tracked-item-list__tracked-item__container">
+                      <span className={containerClass}>
                         <span className="tracked-item-list__tracked-item__repo">
                           {`${item.vendor} / ${item.project}`}
                         </span>
@@ -165,7 +168,7 @@ class Popup extends React.Component {
                         />
                         <a
                           className="tracked-item-list__tracked-item__link"
-                          href={item.url}
+                          href={item.htmlUrl}
                           target="_blank"
                           title="View on GitHub"
                         >

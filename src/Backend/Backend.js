@@ -137,7 +137,7 @@ class Backend {
             const trackedItems = storage.trackedItems || {};
 
             trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
-              endpoint: json.url,
+              hasChanges: false,
               id: json.id,
               mergeable: json.mergeable === void 0 ? false : json.mergeable,
               mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
@@ -146,8 +146,9 @@ class Backend {
               state: json.state,
               title: json.title,
               type,
-              updated: json.updated_at,
-              url: json.html_url,
+              updatedAt: json.updated_at,
+              url: json.url,
+              htmlUrl: json.html_url,
               vendor,
             });
 
@@ -197,12 +198,13 @@ class Backend {
         }
 
         trackedItems[json.id] = Object.assign({}, trackedItems[json.id], {
+          hasChanges: new Date(json.updated_at) > new Date(trackedItems[json.id].updatedAt),
           mergeable: json.mergeable === void 0 ? false : json.mergeable,
           mergeableState: json.mergeable_state === void 0 ? '' : json.mergeable_state,
           merged: json.merged === void 0 ? false : json.merged,
           state: json.state,
           title: json.title,
-          updated: json.updated_at,
+          updatedAt: json.updated_at,
         });
 
         chrome.storage.sync.set({ trackedItems }, () => {
@@ -228,7 +230,7 @@ class Backend {
           }
           // Fetch data for all tracked items.
           Promise
-            .all(items.map((item) => this.fetch(item.endpoint)))
+            .all(items.map((item) => this.fetch(item.url)))
             .then((updates) => {
               // Update the store with the fetched data.
               Promise
