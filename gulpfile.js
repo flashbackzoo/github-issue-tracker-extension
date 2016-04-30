@@ -40,6 +40,7 @@ gulp.task('copy', () => {
       '!./src/__mocks__/*.js',
       '!./src/**/*-test.js',
       '!./src/Popup/*.js',
+      '!./src/TypeIcon/*.js',
       './src/**/*.js',
       './src/**/*.html',
       './src/**/*.json',
@@ -50,7 +51,10 @@ gulp.task('copy', () => {
 
 gulp.task('css', () =>
   gulp
-    .src('./src/**/*.scss')
+    .src([
+      '!./src/TypeIcon/*.scss',
+      './src/**/*.scss',
+    ])
     .pipe(sourcemaps.init())
     .pipe(sass().on('error', sass.logError))
     .pipe(cleancss())
