@@ -2,6 +2,8 @@
 
 Chrome extension for managing issues and pull requests across multiple repos.
 
+![Screenshot](docs/images/popup.png)
+
 This extension is in development, it's not available on the Chrome Web Store, and functionality is likely to change.
 But if you want to try it out anyway, here's how...
 
