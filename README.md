@@ -1,5 +1,7 @@
 # GitHub Wrangler
 
+[![Build Status](https://travis-ci.org/flashbackzoo/github-wrangler.svg?branch=master)](https://travis-ci.org/flashbackzoo/github-wrangler)
+
 Chrome extension for managing issues and pull requests across multiple repos.
 
 ![Screenshot](docs/images/popup.png)
